@@ -1,5 +1,5 @@
-import hobo
-import hobo.electrochemistry
+import pints
+import electrochemistry
 import pickle
 import numpy as np
 
@@ -8,7 +8,6 @@ import matplotlib as mpl
 import pylab as plt
 import numpy.fft as fft
 from math import pi
-
 
 
 filename = 'POMGCL_6020104_1.0M_SFR_d16.txt'
@@ -45,9 +44,8 @@ dim_params = {
     }
 
 
-model = hobo.electrochemistry.POMModel(dim_params)
-
-data = hobo.electrochemistry.ECTimeData(filename,model,ignore_begin_samples=5,ignore_end_samples=0)
+model = electrochemistry.POMModel(dim_params)
+data = electrochemistry.TimeData(filename,model,ignore_begin_samples=5,ignore_end_samples=0)
 
 I,t = model.simulate(use_times=data.time)
 

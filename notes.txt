@@ -1,0 +1,10 @@
+1. fit a complex, multi-step electron transfer process (~15 params)
+2. Show an example of a bad fit, this is what can happen.....
+3. Show heuristic fit, and calculated objective function
+4. Calculate objective function for (a) time domain, and (b) harmonics 1-4
+5. consider the phase, show in supplimentary?
+6. Key is putting prior on E0's, rescaling the liklihood function
+7. Try fitting a fully reversible simulation, compare.
+8. Mention that heuristic focusses on peak height. Data optimisation is not 
+biased, automated and reproducible.
+9. Compare Ru = 0 and Ru = 50 to show undetermined.

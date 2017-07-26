@@ -1,0 +1,3 @@
+[submodule "pints"]
+	path = pints
+	url = git@github.com:martinjrobins/pints.git
