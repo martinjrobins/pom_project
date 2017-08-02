@@ -13,7 +13,7 @@ marginparwidth=1.5cm, marginparsep=0.4cm, margin=2.5cm]{geometry}
 
 %% Useful packages
 \usepackage{graphicx} %allows you to use jpg or png images. PDF is still recommended
-\usepackage[colorlinks=False]{hyperref} % add links inside PDF files
+\usepackage[colorlinks=true,citecolor=blue]{hyperref} % add links inside PDF 
 \usepackage{amsmath}  % Math fonts
 \usepackage{amsfonts} %
 \usepackage{amssymb}  %
@@ -115,8 +115,8 @@ which  an oxidized electroactive species (Ox) is reduced to its reduced form
 (Red) as  summarized in equation 1,   and modelling is undertaken assuming  the 
 Butler-Volmer relationship applies and mass transport occurs solely by planar 
 diffusion, there is likely to be a minimum of 5 parameters that have to be 
-estimated; viz formal reversible potential ($E_0$), heterogeneous charge 
-transfer rate constant ($k_0$), charge transfer coefficient ($\alpha$), , double 
+estimated; viz formal reversible potential ($E^0$), heterogeneous charge 
+transfer rate constant ($k^0$), charge transfer coefficient ($\alpha$), , double 
 layer capacitance ($C_{dl}$) and uncompensated resistance ($R_u$), assuming 
 diffusion coefficients ($D_{ox}$ and $D_{red}$) and other relevant parameter 
 values are known from independent measurements. If chemical steps are coupled to 
@@ -127,7 +127,7 @@ parameterization is impossible to achieve when experimental error and model
 uncertainty are taken into account.
 
 \begin{align} \label{eq:reaction}
-Ox + e^- \cee{&<=>[E_0,k_0,\alpha, C_{dl}, R_u]} Red,
+Ox + e^- \cee{&<=>[E^0,k^0,\alpha, C_{dl}, R_u]} Red,
 \end{align}
 
 The  forward process of predicting the theory using a proposed model, which was 
@@ -215,7 +215,7 @@ spontaneously adsorb onto electrode surfaces such as glassy carbon
 \cite{choi2009adsorption}, gold \cite{choi2009adsorption}, silver 
 \cite{choi2009adsorption}, and reduced graphene oxide 
 \cite{ding2014phosphomolybdate}.  DC and AC cyclic voltammograms shown in in 
-Figure 2 (to be added) were obtained at a glassy carbon (GC) electrode in 1 M 
+Figure 1 (to be added) were obtained at a glassy carbon (GC) electrode in 1 M 
 H2SO. The three  surface confined reduction processes displayed in these 
 voltammograms under  the acidic conditions relevant to this study  and 
 designated as Processes I, II and III are each overall  two electron-two proton 
@@ -223,83 +223,89 @@ coupled process   that can be represented by  equations 1-3
 \cite{chen2013fabrication}.  
 
 \begin{align}
-    \cee{[PMo12O40]3- + 2e- + 2H+ &<=>[E_0,k_0,\alpha, C_{dl}, R_u] 
-    H2[PMo12O40]3-} \qquad \text{(Process I)} \\
-    \cee{H2[PMo12O40]3- + 2e- + 2H+ &<=>[E_0,k_0,\alpha, C_{dl}, R_u] 
+    \cee{[PMo10O40]3- + 2e- + 2H+ &<=>[E^0,k^0,\alpha, C_{dl}, R_u] 
+    H2[PMo12O40]3-} \qquad \text{(Process I)} \label{eq:process_I}\\
+    \cee{H2[PMo12O40]3- + 2e- + 2H+ &<=>[E^0,k^0,\alpha, C_{dl}, R_u] 
     H4[PMo12O40]3-} \qquad \text{(Process II)} \\
-    \cee{H4[PMo12O40]3- + 2e- + 2H+ &<=>[E_0,k_0,\alpha, C_{dl}, R_u] 
+    \cee{H4[PMo12O40]3- + 2e- + 2H+ &<=>[E^0,k^0,\alpha, C_{dl}, R_u] 
     H6[PMo12O40]3-} \qquad \text{(Process III)}
 \end{align}
 
 
 The peak potentials and are located   at about 350 (Process I), 225 (Process 
-II), and 10 (Process III) mV vs Ag/AgCl in 1 M H2SO4 and depend on acid 
-concentration (shift of about 60mV per unit change in H2SO4 concentration change 
-over the range 0.01 to 1.0M) as expected if   a net two- proton transfer 
+II), and 10 (Process III) mV vs \ce{Ag/AgCl} in 1 M \ce{H2SO4} and depend on 
+acid concentration (shift of about 60mV per unit change in H2SO4 concentration 
+change over the range 0.01 to 1.0M) as expected if a net two- proton transfer 
 reaction accompanies a net two-electron transfer reaction. However, extensive 
 reduction to give Process IV (not shown) leads to rapid dissolution of solid 
 while use of lower acidities facilitates dissolution. Furthermore, describing 
-the fully oxidized as completely unprotonated in 1 M H2SO4 is unlikely to be 
-correct.  
-
+the fully oxidized \ce{[PMo12O40]} as completely unprotonated in 1 M \ce{H1SO4} 
+is unlikely to be correct.  
 
 Points for noting gained from perusal of Figure 2 and which should be 
 accommodated in simulation-experiment comparisons are that the first two 
 processes partially overlap, Process II has a larger peak current magnitude than 
 either Processes I or III and the shapes and current magnitudes are not equal 
 for all three processes. Importantly, for each of the three reduction steps it 
-has been proposed [9-14] that two unresolved reversible one electron transfer 
-steps of purely adsorbed material occur as in equations 5 and 6 (5)
- 									 (6)		
+has been proposed \cite{batchelor2015recent,lopez2014two, 
+gonzalez2013reversible,mirceski2016measuring,saveant2006elements,evans2008one} 
+that two unresolved reversible one electron transfer steps of purely adsorbed 
+material occur as in equations 5 and 6 
 
-where Oxsurf and Redsurf are the fully oxidized formally [PMo12O40]3- (written 
-for convenience in the non-protonated form) and 2 electron reduced formally 
-protonated [PMo12O40]5-  species bound to the electrode surface  while Isurf is 
-an intermediate or half-way reduced surface confined  protonated [PMo12O40]4- 
-species. Even the simplest possible level of data analysis with all six electron 
-transfer steps treated as reversible and all other parameter values known 
-requires the determination of six reversible formal potentials (E0 values).  
-Inclusion of the electrode kinetics for requires the addition of six electron 
-transfer rate constants  ($k_0$  values) along with six charge transfer 
-coefficients ($\alpha$ values) if the Butler-Volmer relationship is used to 
-model the electron transfer processes. Additionally, $C_{dl}$, $R_u$, and the 
-adsorption isotherm need to be modelled as in principle do the thermodynamics 
-and kinetics of the chemical (acid-base)   reactions coupled to electron 
-transfer. The existence of unresolved overall 2 electron processes precludes any 
-simple interpretation of the thermodynamics and electrode kinetics and there are 
-well in excess of thirty parameters present in the full POM reduction modeling 
-exercise. As noted above, even at this level of complexity, all parameters could 
-be included in the forward problem using MECSim, DigiElch or other software 
-packages. However, it is not likely to be realistic to simply undertake a 30 or 
-more parameter determination exercise using a manual heuristic or even an 
-automated data so the optimization experiment –theory fitting exercise and 
-expect to obtain a chemically and statically reasonable unique value for each 
-one. In a practical sense it will be shown in this study that the best 
-opportunity to approach this goal is by integration of both heuristic and 
-automated data optimization approaches to achieve   a high level of agreement 
-between experiment and theory for about 15 parameters that are shown to 
-significantly influence the voltammetry.
+\begin{align}
+    Ox_{surf} + e^- \cee{&<=>[E^0_1,k^0_1]} I_{surf} \label{eq:ox_to_i} \\
+    I_{surf} + e^- \cee{&<=>[E^0_2,k^0_2]} Red_{surf}, \label{eq:i_to_red}
+\end{align}
+
+where $Ox_{surf}$ and $Red_{surf}$ are the fully oxidized formally 
+\ce{[PMo12O40]3-} (written for convenience in the non-protonated form) and 2 
+electron reduced formally protonated \ce{[PMo12O40]5-} species bound to the 
+electrode surface while $I_{surf}$ is an intermediate or half-way reduced 
+surface confined  protonated \ce{[PMo12O40]4-} species. Even the simplest 
+possible level of data analysis with all six electron transfer steps treated as 
+reversible and all other parameter values known requires the determination of 
+six reversible formal potentials ($E^0$ values). Inclusion of the electrode 
+kinetics for requires the addition of six electron transfer rate constants  
+($k^0$  values) along with six charge transfer coefficients ($\alpha$ values) if 
+the Butler-Volmer relationship is used to model the electron transfer processes.  
+Additionally, $C_{dl}$, $R_u$, and the adsorption isotherm need to be modelled 
+as in principle do the thermodynamics and kinetics of the chemical (acid-base)   
+reactions coupled to electron transfer. The existence of unresolved overall 2 
+electron processes precludes any simple interpretation of the thermodynamics and 
+electrode kinetics and there are well in excess of thirty parameters present in 
+the full POM reduction modeling exercise. As noted above, even at this level of 
+complexity, all parameters could be included in the forward problem using 
+MECSim, DigiElch or other software packages. However, it is not likely to be 
+realistic to simply undertake a 30 or more parameter determination exercise 
+using a manual heuristic or even an automated data so the optimization 
+experiment –theory fitting exercise and expect to obtain a chemically and 
+statically reasonable unique value for each one. In a practical sense it will be 
+shown in this study that the best opportunity to approach this goal is by 
+integration of both heuristic and automated data optimization approaches to 
+achieve   a high level of agreement between experiment and theory for about 15 
+parameters that are shown to significantly influence the voltammetry.
 
 Finally, in this Introduction it is emphasized that the data set obtained 
 experimentally has to be sufficient in quality and quantity to justify the 
 conclusions reached in a parameterization exercise and capable of being mimicked 
 by the simulations. AC voltammetry in square wave, sinusoidal or other forms as 
 well as EIS provide significant advantages over traditional DC methods in 
-quantitative studies of electrode processes [15-16]. If large amplitude AC 
-signals are employed, the significantly amplified higher-order AC harmonic 
-components become available that are virtually free of background capacitance 
-current and are also highly sensitive to electrode kinetics. The ability to 
-resolve the aperiodic DC, fundamental and higher order harmonics is crucial in 
-heuristic forms of data analysis. For simple problems, comparison of 
-experimental data with the numerical simulations of appropriate models have 
-provided  good estimates of $E_0$,  $k_0$, $\alpha$, $R_u$ and $C_{dl}$ from a 
-single experiment, using  both heuristic and data optimization forms of 
-experiment -theory comparison. Large amplitude AC voltammetry also has been 
-applied to the determination of the electrode kinetics of surface-confined 
-enzymes. In some cases, their behavior  mimics that   with \ce{[PMo12O40]3-}   
-in the sense  that  acid-base chemistry   can be coupled with an unresolved 2 
-electron transfer process to provide a problem  akin to a combination of 
-equations 2, 5 and 6. In this study, experience acquired in parameterization of 
+quantitative studies of electrode processes 
+\cite{bond2015integrated,guo2015fourier}. If large amplitude AC signals are 
+employed, the significantly amplified higher-order AC harmonic components become 
+available that are virtually free of background capacitance current and are also 
+highly sensitive to electrode kinetics. The ability to resolve the aperiodic DC, 
+fundamental and higher order harmonics is crucial in heuristic forms of data 
+analysis. For simple problems, comparison of experimental data with the 
+numerical simulations of appropriate models have provided  good estimates of 
+$E^0$,  $k^0$, $\alpha$, $R_u$ and $C_{dl}$ from a single experiment, using  
+both heuristic and data optimization forms of experiment -theory comparison.  
+Large amplitude AC voltammetry also has been applied to the determination of the 
+electrode kinetics of surface-confined enzymes. In some cases, their behavior  
+mimics that   with \ce{[PMo12O40]3-} in the sense  that  acid-base chemistry   
+can be coupled with an unresolved 2 electron transfer process to provide a 
+problem akin to a combination of equations \ref{eq:process_I}, \ref{eq:ox_to_i} 
+and \ref{eq:i_to_red}. In this study, experience acquired in parameterization of 
 these simpler systems (refs) is crucial in addressing the vastly more complex 
 problem of parameterization of the six electron reduction of surface confined 
 \ce{[PMo12O40]3-}.
@@ -323,10 +329,10 @@ rate ($v$).   DC voltammetric data were also obtained with this instrument. A
 conventional three-electrode potentiated system was used to collect experimental 
 data at 25°C.  GC (diameter = 3.0 mm, CH Instruments, USA) was used as the 
 working electrode,
-\ce{Ag/AgCl} (3M KCl) as the reference electrode and platinum wire as the auxiliary electrode with 1.0M \ce{H2SO4} being the supporting electrolyte.
+\ce{Ag/AgCl} (3M \ce{KCl}) as the reference electrode and platinum wire as the 
+auxiliary electrode with 1.0M \ce{H2SO4} being the supporting electrolyte.
 
 \subsection{Simulations and data analysis}
-
 
 Simulations of total current AC voltammograms used in heuristic forms of data 
 analysis were carried out with MECSim (Monash Electrochemistry Simulator) 
@@ -335,63 +341,66 @@ automated data optimization exercises. Details of the model and parametrization
 employed are provided in the Results and Discussion section.  In Fourier 
 transformed  AC voltammetry (FTACV) the experimental and simulated total current 
 time domain data were converted to the frequency domain to generate the power 
-spectrum [39,40]. Frequencies corresponding to the AC harmonics and the 
-aperiodic DC component were then selected from the power spectrum and then 
-subjected to band filtering and inverse Fourier transformation to obtain 
-resolved DC and AC components as a function of time. Ru was determined 
-experimentally from the RuCdl time constant at potentials where no faradaic 
-current was present.
+spectrum [ref]. Frequencies corresponding to the AC harmonics and the aperiodic 
+DC component were then selected from the power spectrum and then subjected to 
+band filtering and inverse Fourier transformation to obtain resolved DC and AC 
+components as a function of time. $R_u$ was determined experimentally from the 
+$R_u C_{dl}$ time constant at potentials where no faradaic current was present.
 
 \section{Results and Discussion}
 
 \subsection{The Model}
-
 
 To simulate the total current AC voltammetric data, a mathematical model has to 
 be employed. To mimic the 3 surface confined processes summarized in equations 2 
 to 4, a series of well-known relationships were employed in combination to give 
 a total model as follows:
 
-1. Electron transfer model: the Butler-Volmer relationship was used for each of 
-the six electron transfer steps which requires the introduction of six $E_0$, 
-$k_0$ and $\alpha$ parameters.  Alternately, the mathematically more 
-sophisticated Marcus-Hush relationship could have been used. Neither 
-thermodynamic nor kinetic dispersion are included in the electron transfer 
-model.
+\begin{enumerate}
+\item Electron transfer model: the Butler-Volmer relationship was used for each 
+    of the six electron transfer steps which requires the introduction of six 
+        $E^0$, $k^0$ and $\alpha$ parameters.  Alternately, the mathematically 
+        more sophisticated Marcus-Hush relationship could have been used.  
+        Neither thermodynamic nor kinetic dispersion are included in the 
+        electron transfer model.
 
-2. Acid-base chemistry: proton transfer reactions coupled to electron transfer 
-were assumed to be diffusion controlled and hence reversible and subject to a 
-solely thermodynamic description as is E0. On this basis, the unknown acid (pKa) 
-equilibrium constants have been combined with the E0 values so effectively only 
-six reversible potential (Erev) thermodynamically relevant parameters with their 
-six krev and $\alpha$rev values need to be parameterized. However, this means 
-that the individual $E_0$, $k_0$, $\alpha$, and pKa values remain unknown.  3.  
-Adsorption isotherm: the Langmuir model was used, which means that a surface 
-coverage parameter is needed. Other isotherms are available such as Frumkin or 
-Temkin.
+\item Acid-base chemistry: proton transfer reactions coupled to electron 
+    transfer were assumed to be diffusion controlled and hence reversible and 
+        subject to a solely thermodynamic description as is $E^0$. On this 
+        basis, the unknown acid ($pK_a$) equilibrium constants have been 
+        combined with the $E^0$ values so effectively only six reversible 
+        potential ($E_{rev}$) thermodynamically relevant parameters with their 
+        six $k_{rev}$ and $\alpha_{rev}$ values need to be parameterized.  
+        However, this means that the individual $E^0$, $k^0$, $\alpha$, and 
+        $pK_a$ values remain unknown.  
 
-4. Uncompensated resistance: Ohms law used (Ru parameter introduced).
+\item Adsorption isotherm: the Langmuir model was used, which means that a 
+    surface coverage parameter is needed. Other isotherms are available such as 
+        Frumkin or Temkin.
 
-5. Double layer capacitance: Modeling undertaken assumes a simple RuCdl time 
-constant   applies at each potential and that $C_dl$ is independent of potential 
-(Cdl parameter needed). In fact Cdl depends on potential
+\item Uncompensated resistance: Ohms law used ($R_u$ parameter introduced).
 
-6. Numerous other parameters are included in the model (see theory below), but 
-most are known such as AC amplitude DC scan rate, electrode area, temperature 
-etc. However, as a check on fidelity of experimental data, AC frequency and 
-phase angle are treated as parameters to be estimated in the automated but not 
-heuristic data optimization approach to ensure absence of instrumental 
-artefacts. 
+\item Double layer capacitance: Modeling undertaken assumes a simple $R_u$$C_{dl}$ time 
+    constant   applies at each potential and that $C_dl$ is independent of 
+        potential ($C_{dl}$ parameter needed). In fact $C_{dl}$ depends on potential
 
-In summary, the   model chosen for simulation of AC voltammograms   requires a 
-total of 17 parameters to be estimated by automated data optimization and 15 
+\item Numerous other parameters are included in the model (see theory below), 
+    but most are known such as AC amplitude DC scan rate, electrode area, 
+        temperature etc. However, as a check on fidelity of experimental data, 
+        AC frequency and phase angle are treated as parameters to be estimated 
+        in the automated but not heuristic data optimization approach to ensure 
+        absence of instrumental artefacts.  
+
+\end{enumerate}
+
+In summary, the model chosen for simulation of AC voltammograms requires a total 
+of 17 parameters to be estimated by automated data optimization and 15 
 heuristically under circumstances where there are imperfections and 
 uncertainties in each aspect of the model as noted above 
 
 Martin to add model details in terms of A, B, C, D, E, and F species and math’s
 
 \subsection{Heuristic Method of Parameter Estimation}
-
 
 The heuristic or exclusively experimenter based trial and error method to be 
 tractable requires simplifying the problem and obtaining initial estimates of 
@@ -404,31 +413,33 @@ individual decided an acceptably “good fit” to data had been achieved. Of co
 a different experimentalist may decide that the “good fit” is achieved with a 
 different set of parameters!
 
-
 The initial scrutiny of data involved visual interrogation of   20mV amplitude 
 FTAC data sets at 9 and 60 Hz (Figs x and y), their power spectra and the first 
 4 AC harmonics (Figs e, f) and a dc cyclic voltammogram (figure a). This 
 overview allowed initial guesses or estimates to be made for some parameters 
 along with some deductions as to the validity of the model as follows:
 
-(a)  It was noted in the fundamental AC harmonic that a potential (time) region exists prior to onset of faradaic current for process I that is purely capacitive.  This region was analyzed in terms of the RuCdl time constant to give an estimate of Ru as 50 +/- 5 Ohm. 
+(a) It was noted in the fundamental AC harmonic that a potential (time) region 
+exists prior to onset of faradaic current for process I that is purely 
+capacitive.  This region was analyzed in terms of the $R_u  C_{dl}$ time constant to 
+give an estimate of $R_u$ as 49 +/- 5 Ohm. 
 
 (b) By matching experiment and theory  for the same potential (time) region in 
-the fundamental   harmonic that is devoid of faradaic current a described in (a) 
-and effectively use of equation x (to be added), Cdl was estimated to be 7 +/- 1 
-(TODO: units) F cm-2. However, the sloping baseline in  the DC cyclic 
+the fundamental  harmonic that is devoid of faradaic current a described in (a) 
+and effectively use of equation x (to be added), $C_{dl}$ was estimated to be 7 
++/- 1 (TODO: units) F cm-2. However, the sloping baseline in  the DC cyclic 
 voltammogram and mismatch of positive and negative potential regions of 
 fundamental harmonic devoid of faradaic current, and indeed the aperiodic DC 
-component of FTACV data, it is clear that Cdl  potential dependent, rather than 
-potential independent, as assumed in the model. Thus, treating Cdl as a 
+component of FTACV data, it is clear that $C_{dl}$  potential dependent, rather 
+than potential independent, as assumed in the model. Thus, treating $C_{dl}$ as a 
 potential independent parameter in an experiment versus theory exercise will 
 represent an imperfect approximation.  More complex potential dependent 
-estimates of Cdl could have been included in the model. However, perusal of 
+estimates of $C_{dl}$ could have been included in the model. However, perusal of 
 third and fourth AC harmonics (Figure x) reveals no background current in these 
 responses, implying that the electrode kinetics can be estimated from these data 
 that are devoid if capacitance current.  Consequently, moving to the more 
 complex capacitance model was not regarded as necessary, particularly under 
-conditions where the Ohmic drop or ItotalRu is small.
+conditions where the Ohmic drop or $I_{total} R_u$ is small.
 
 (c) The surface coverage was found to be $\Gamma$ = 50 +/- 5 pmole cm-2 based on 
 integration of DC current time-data to give the charge associated with reduction 
@@ -438,10 +449,10 @@ processes I and II (n=4) or process   III (n = 2) after   background
 (capacitance current) correction of a DC linear sweep voltammogram (ref)
 
 (d) Since all three processes are known to be overall two electron, are sharp 
-and give a series of well-defined higher order AC components, the k0 values were 
+and give a series of well-defined higher order AC components, the $k_0$ values were 
 assumed to be large. The initial guess was that all are sufficiently large and 
 that with a low frequency of 9Hz that all one electron processes could initially 
-be assumed to be reversible.  Furthermore, the two Erev values associated with 
+be assumed to be reversible.  Furthermore, the two $E_{rev}$ values associated with 
 each of processes I, II and III are clearly not well separated in the direction 
 that the second electron transfer step is more negative than the second.  Thus, 
 the reversible potentials of the two  overlapping  steps in all cases were 
@@ -449,10 +460,10 @@ concluded to be either almost the same  or the second electron transfer step was
 less negative  than the first (crossed over potentials because of the 
 thermodynamic contribution of protonation step coupled to electron transfer as 
 noted above) To obtain more detail, Figure 2 was generated to provide simulated 
-fundamental and third harmonic AC  data where the separation of the two Erev 
+fundamental and third harmonic AC  data where the separation of the two $E_{rev}$ 
 values in process was II fixed at zero (largest current magnitude ) while  
-processes  II and III had variable separations in the Erev ($\Delta E_{rev}$) 
-values from 0 to 55 mV with all $k_0$ and $\alpha$  values being set at 1 x 10 8  
+processes  II and III had variable separations in the $E_{rev}$ ($\Delta E_{rev}$) 
+values from 0 to 55 mV with all $k^0$ and $\alpha$  values being set at 1 x 10 8  
 s-1  and 0.50 respectively to mimic a reversible process  and other parameters 
 set at estimates approximating those deduced in (a), (b) and (c) above.  Greater 
 crossover potentials   than 55 mV were deemed unreasonable. By eye, and with 
@@ -460,20 +471,20 @@ some fine tuning, $\Delta E_{rev} = 30$, 0 and 27  for process I, II and III
 respectively gave match of theory and experiment for the 9Hz low frequency data 
 set. To confirm that the assumption of reversibility is valid and what this 
 means, Figure 3  was generated with  simulated fundamental and third harmonic 
-response for the pairs of k0 values always the same but ranging from 1.0 x103 to 
-10 8  s-1  with $\alpha$ being set at 0.50 and $\Delta E_{rev} = 33$, 0 and 45.  
-At the low frequency of 9 Hz, all three processes are insensitive to k0 
-electrode kinetics in excess of 102 s-1. Thus it was concluded from this trial 
-and error analysis that $\Delta E_{rev} = 30$, 0 and 27 were appropriate for 
-processes I, I and III which translates to Erev values of 368, 338, 227, 227 11 
-and -16 mV Ag/AgCl and that some if not all k0 values are larger than about 102 
-s-1.   
+response for the pairs of $k_0$ values always the same but ranging from $1.0 \times 
+10^3$ to $10^8$  s-1  with $\alpha$ being set at 0.50 and $\Delta E_{rev} = 33$, 
+0 and 45.  At the low frequency of 9 Hz, all three processes are insensitive to 
+$k_0$ electrode kinetics in excess of $10^2$ s-1. Thus it was concluded from 
+this trial and error analysis that $\Delta E_{rev} = 30$, 0 and 27 were 
+appropriate for processes I, I and III which translates to $E_{rev}$ values of 
+368, 338, 227, 227 11 and -16 mV Ag/AgCl and that some if not all $k_0$ values are 
+larger than about $10^2$ s-1.   
 
 (e) Examination of the higher frequency 60 Hz data set implied that the 
 electrode kinetics could possibly be determined from theory experiment 
 comparisons of the higher order AC harmonics However, the only reasonable trial 
-and error heuristic approach available was to set the k0 value for each pair of 
-processes to be equal with $\alpha = 0.50$, assume Erev values and other 
+and error heuristic approach available was to set the $k_0$ value for each pair 
+of processes to be equal with $\alpha = 0.50$, assume $E_{rev}$ values and other 
 parameters are known from 9 Hz data or can be re-estimated as for 9 Hz data. Now 
 only  pairs of ko values are the along with the surface coverage scaling factor 
 $\Gamma$ remain as unknowns. After much tedious trial and error examining many 
@@ -486,7 +497,7 @@ from implying  that fast electrode kinetics  approaching the reversible limit is
 evident for each of processes I, II and III
 
 Since the fit obtained heuristically is imperfect and to make tractable had to 
-assume that pairs of k0 values are equal, it now needs to be established as what 
+assume that pairs of $k_0$ values are equal, it now needs to be established as what 
 outcome could be achieved   via multi-parameter data optimization and how this 
 exercises should be implemented since almost certainly simply seeking to obtain 
 15 or more unknown parameters from a single multi-parameter fit would be futile.  
@@ -497,19 +508,18 @@ data optimization are needed to obtain chemically sensible outcomes.
 
 \subsection{Mathematical Modelling}
 
-
 The details of the mathematical and computational modelling approach that we 
-have taken in this paper were given previously in \cite{Morrisetal,gavaghan 
-2017}. In summary, our chosen experimental system is modelled as a 
-quasi-reversible reaction 
+have taken in this paper were given previously in 
+\cite{Morrisetal,gavaghan2017}. In summary, our chosen experimental system is 
+modelled as a quasi-reversible reaction 
 
 \begin{align} \label{reaction}
-A \cee{&<=>[E_0,k_0,\alpha]} B + e^-, 
+A \cee{&<=>[E^0,k^0,\alpha]} B + e^-, 
 \end{align}
 
-where species $A$ and $B$ are in solution, and $E_0$, $k_0$, and $\alpha$  are 
+where species $A$ and $B$ are in solution, and $E^0$, $k^0$, and $\alpha$  are 
 the reversible formal potential, standard heterogeneous charge transfer rate 
-constant at $E_0$ and the charge transfer coefficient, respectively, and we 
+constant at $E^0$ and the charge transfer coefficient, respectively, and we 
 assume that the Butler-Volmer formalism is used to describe the electron 
 transfer process 
 \cite{BardFaulkner,brett1993principles,pletcher2001instrumental}. We assume that 
@@ -543,8 +553,8 @@ D \frac{\partial c_A}{\partial x}=\frac{I_f}{FS}, \label{fluxatelectrode}
 along with the Butler-Volmer condition
 
 \begin{align}
-D \frac{\partial c_A}{\partial x} = \text{ }&k_0 \left[c_A\exp\left((1-\alpha )\frac{F}{RT}(E_{\mbox{\tiny eff}}(t)-E_0)\right)\right.
-\left.-(1-c_A)\exp\left(-\alpha\frac{F}{RT}(E_{\mbox{\tiny eff}}(t)-E_0)\right)\right]. \label{BVeqtn}
+D \frac{\partial c_A}{\partial x} = \text{ }&k^0 \left[c_A\exp\left((1-\alpha )\frac{F}{RT}(E_{\mbox{\tiny eff}}(t)-E^0)\right)\right.
+\left.-(1-c_A)\exp\left(-\alpha\frac{F}{RT}(E_{\mbox{\tiny eff}}(t)-E^0)\right)\right]. \label{BVeqtn}
 \end{align}
 
 Here, $I_f$ is the faradaic current, $S$ is the electrode area, and 
@@ -583,7 +593,7 @@ I_{\mbox{\tiny{tot}}} = I_f + I_c. \label{Itot}
 \end{align}
 
 As described in the introduction in Eqs. \ref{Lambda}, for the case of DC 
-voltammetric methods the values of $k_0$, $D$ and $v$ determine whether the 
+voltammetric methods the values of $k^0$, $D$ and $v$ determine whether the 
 reaction is fully-reversible (large $\Lambda$), quasi-reversible (intermediate 
 $\Lambda$), or irreversible (small $\Lambda$). 
 
@@ -595,7 +605,7 @@ expanding grid (as we have described in full detail previously - see
 \cite{Sheretal}). Having derived the governing partial differential equations 
 and boundary conditions for this simplest problem of the reaction mechanism in 
 Eq. \ref{reaction} we can see mathematically that the mechanism is governed by 
-five parameters $(k_0, E_0, \alpha, R_u, C_{dl})$, and we will collectively 
+five parameters $(k^0, E^0, \alpha, R_u, C_{dl})$, and we will collectively 
 denote these parameters by the vector $ \boldsymbol\theta$. The {\em inverse} 
 problem that we wish to solve can be defined as finding the best possible 
 approximation to $\boldsymbol\theta$ given our measured experimental output 
@@ -605,5 +615,6 @@ This will be achieved by recovering the marginal posterior distributions of each
 parameter that are induced by the experimental noise.  
 
 
+\bibliography{poms.bib}
 
 \end{document}
