@@ -1,5 +1,5 @@
 import pints
-import electrochemistry
+from pints import electrochemistry
 import pickle
 import numpy as np
 
@@ -45,40 +45,40 @@ dim_params = {
 
 
 model = electrochemistry.POMModel(dim_params)
-data = electrochemistry.TimeData(filename,model,ignore_begin_samples=5,ignore_end_samples=0)
+data = electrochemistry.ECTimeData(filename,model,ignore_begin_samples=5,ignore_end_samples=0)
 
 I,t = model.simulate(use_times=data.time)
 
 print 'data loglikelihood is currently',data.log_likelihood(I,0.5)
 
 # specify bounds for parameters
-prior = hobo.Prior()
+prior = pints.Prior()
 e0_buffer = 0.1*(model.params['Estart'] - model.params['Ereverse'])
 E0 = 0.5*(model.params['E01'] + model.params['E02'])
 E0_diff = 1
-prior.add_parameter('E01',hobo.Normal(E0,(2*E0_diff)**2),
+prior.add_parameter('E01',pints.Normal(E0,(2*E0_diff)**2),
         model.params['Ereverse']+e0_buffer,model.params['Estart']-e0_buffer)
-prior.add_parameter('E02',hobo.Normal(E0,(2*E0_diff)**2),
+prior.add_parameter('E02',pints.Normal(E0,(2*E0_diff)**2),
         model.params['Ereverse']+e0_buffer,model.params['Estart']-e0_buffer)
 E1 = 0.5*(model.params['E11'] + model.params['E12'])
 E1_diff = 1
-prior.add_parameter('E11',hobo.Normal(E1,(2*E1_diff)**2),
+prior.add_parameter('E11',pints.Normal(E1,(2*E1_diff)**2),
         model.params['Ereverse']+e0_buffer,model.params['Estart']-e0_buffer)
-prior.add_parameter('E12',hobo.Normal(E1,(2*E1_diff)**2),
+prior.add_parameter('E12',pints.Normal(E1,(2*E1_diff)**2),
         model.params['Ereverse']+e0_buffer,model.params['Estart']-e0_buffer)
 E2 = 0.5*(model.params['E21'] + model.params['E22'])
 E2_diff = 1
-prior.add_parameter('E21',hobo.Normal(E2,(2*E2_diff)**2),
+prior.add_parameter('E21',pints.Normal(E2,(2*E2_diff)**2),
         model.params['Ereverse']+e0_buffer,model.params['Estart']-e0_buffer)
-prior.add_parameter('E22',hobo.Normal(E2,(2*E2_diff)**2),
+prior.add_parameter('E22',pints.Normal(E2,(2*E2_diff)**2),
         model.params['Ereverse']+e0_buffer,model.params['Estart']-e0_buffer)
-prior.add_parameter('k01',hobo.Uniform(),0,10000)
-prior.add_parameter('k02',hobo.Uniform(),0,10000)
-prior.add_parameter('k11',hobo.Uniform(),0,10000)
-prior.add_parameter('k12',hobo.Uniform(),0,10000)
-prior.add_parameter('k21',hobo.Uniform(),0,10000)
-prior.add_parameter('k22',hobo.Uniform(),0,10000)
-prior.add_parameter('gamma',hobo.Uniform(),0.1,10.0)
+prior.add_parameter('k01',pints.Uniform(),0,10000)
+prior.add_parameter('k02',pints.Uniform(),0,10000)
+prior.add_parameter('k11',pints.Uniform(),0,10000)
+prior.add_parameter('k12',pints.Uniform(),0,10000)
+prior.add_parameter('k21',pints.Uniform(),0,10000)
+prior.add_parameter('k22',pints.Uniform(),0,10000)
+prior.add_parameter('gamma',pints.Uniform(),0.1,10.0)
 
 print 'before cmaes, parameters are:'
 names = prior.get_parameter_names()
@@ -119,8 +119,8 @@ names = ['k01',
         'gamma']
 model.set_params_from_vector(v,names)
 
-#hobo.fit_model_with_cmaes(data,model,prior,IPOP=[10,20,40,80,160])
-#hobo.fit_model_with_cmaes(data,model,prior)
+#pints.fit_model_with_cmaes(data,model,prior,IPOP=[10,20,40,80,160])
+#pints.fit_model_with_cmaes(data,model,prior)
 
 print 'after cmaes, parameters are:'
 names = prior.get_parameter_names()
