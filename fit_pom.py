@@ -1,14 +1,17 @@
-import hobo
-import hobo.electrochemistry
+import pints
+import pints.electrochemistry
 import pickle
 import numpy as np
+import os
+import sys
+import math
 
 import matplotlib as mpl
 #mpl.use('Agg')
 import pylab as plt
 import numpy.fft as fft
 from math import pi
-
+import copy
 
 
 filename = 'POMGCL_6020104_1.0M_SFR_d16.txt'
@@ -45,160 +48,181 @@ dim_params = {
     }
 
 
-model = hobo.electrochemistry.POMModel(dim_params)
+model_base = pints.electrochemistry.POMModel(dim_params)
+data = pints.electrochemistry.ECTimeData(filename,model_base,ignore_begin_samples=5,ignore_end_samples=0)
 
-data = hobo.electrochemistry.ECTimeData(filename,model,ignore_begin_samples=5,ignore_end_samples=0)
-
-I,t = model.simulate(use_times=data.time)
-
-print 'data loglikelihood is currently',data.log_likelihood(I,0.5)
-
-# specify bounds for parameters
-prior = hobo.Prior()
-e0_buffer = 0.1*(model.params['Estart'] - model.params['Ereverse'])
-E0 = 0.5*(model.params['E01'] + model.params['E02'])
-E0_diff = 1
-prior.add_parameter('E01',hobo.Normal(E0,(2*E0_diff)**2),
-        model.params['Ereverse']+e0_buffer,model.params['Estart']-e0_buffer)
-prior.add_parameter('E02',hobo.Normal(E0,(2*E0_diff)**2),
-        model.params['Ereverse']+e0_buffer,model.params['Estart']-e0_buffer)
-E1 = 0.5*(model.params['E11'] + model.params['E12'])
-E1_diff = 1
-prior.add_parameter('E11',hobo.Normal(E1,(2*E1_diff)**2),
-        model.params['Ereverse']+e0_buffer,model.params['Estart']-e0_buffer)
-prior.add_parameter('E12',hobo.Normal(E1,(2*E1_diff)**2),
-        model.params['Ereverse']+e0_buffer,model.params['Estart']-e0_buffer)
-E2 = 0.5*(model.params['E21'] + model.params['E22'])
-E2_diff = 1
-prior.add_parameter('E21',hobo.Normal(E2,(2*E2_diff)**2),
-        model.params['Ereverse']+e0_buffer,model.params['Estart']-e0_buffer)
-prior.add_parameter('E22',hobo.Normal(E2,(2*E2_diff)**2),
-        model.params['Ereverse']+e0_buffer,model.params['Estart']-e0_buffer)
-prior.add_parameter('k01',hobo.Uniform(),0,10000)
-prior.add_parameter('k02',hobo.Uniform(),0,10000)
-prior.add_parameter('k11',hobo.Uniform(),0,10000)
-prior.add_parameter('k12',hobo.Uniform(),0,10000)
-prior.add_parameter('k21',hobo.Uniform(),0,10000)
-prior.add_parameter('k22',hobo.Uniform(),0,10000)
-prior.add_parameter('gamma',hobo.Uniform(),0.1,10.0)
-
-print 'before cmaes, parameters are:'
-names = prior.get_parameter_names()
-v = np.zeros(len(names))
-for i in range(len(names)):
-    v[i] = model.params[names[i]]
-    print names[i],': ',model.params[names[i]]
-
-print 'param loglikelihood is currently',prior.log_likelihood(v,names)
-
-#
-
-v = [351.799992423,
-  4374.66433409,
-  6948.72148094,
-  -0.0171315128634,
-  -0.587492063523,
-  5965.6272421,
-  8.53884480798,
-  9.13625737772,
-  13.6671653148,
-  2184.96104188,
-  14.0741162244,
-  885.199106042,
-  0.808733615878]
-names = ['k01',
-         'k02',
-        'k21',
-        'E21',
-        'E22',
-        'k12',
-        'E11',
-        'E12',
-        'E02',
-        'k11',
-        'E01',
-        'k22',
-        'gamma']
-model.set_params_from_vector(v,names)
-
-#hobo.fit_model_with_cmaes(data,model,prior,IPOP=[10,20,40,80,160])
-#hobo.fit_model_with_cmaes(data,model,prior)
-
-print 'after cmaes, parameters are:'
-names = prior.get_parameter_names()
-for name in prior.get_parameter_names():
-    print name,': ',model.params[name]
-
-print 'after cmaes, dim parameters are:'
-
-names = prior.get_parameter_names()
-for name in prior.get_parameter_names():
-    print name,': ',model.dim_params[name]
-
-
-
-I,t = model.simulate(use_times=data.time)
-t = np.array(t)
-F = (fft.fft(I),fft.fft(data.current))
-dt = t[1]-t[0]
-signal_f = model.params['omega']/(2*pi)
-ia = np.array([1,2,3,4,5,6,7,8])
-hs = ia*signal_f
-lowcut = hs - signal_f/4
-highcut = hs + signal_f/4
-f,axs = plt.subplots(4,2,figsize = (10,13))
-fabs,axs_abs = plt.subplots(4,2,figsize = (10,13))
-colors = ['blue','red']
-
-weights = np.zeros(len(I))
-nyq = 0.5/dt
-mod = 1
-T_0 = model.T0
-I_0 = model.I0
-for i in range(len(ia)):
-    print 'doing subplot',int(i/2),',',i%2
-    cfreq = int(len(F[0]) * hs[i]/nyq/2)
-    band_low = int(lowcut[i]/nyq*len(F[0])/2)
-    band_high = int(highcut[i]/nyq*len(F[0])/2)
-    weights[:] = 0.0
-    weights[band_low:band_high] = 2.0
-    ax = axs[int(i/2),i%2]
-    ax_abs = axs_abs[int(i/2),i%2]
-    for color,FI in zip(colors,F):
-        Ih = FI*weights
-        Ih = np.concatenate((Ih[cfreq:],Ih[0:cfreq]))
-        Ih = fft.ifft(Ih)
-
-        if len(I)%2 == 0:
-            ax.plot(t[0::mod]*T_0,np.real(Ih[0::mod])*I_0*1e6,c=color,ls='-')
-            ax.plot(t[0::mod]*T_0,np.imag(Ih[0::mod])*I_0*1e6,c=color,ls='--')
-            ax_abs.plot(t[0::mod]*T_0,np.abs(Ih[0::mod])*I_0*1e6,c=color,ls='-')
-        else:
-            ax.plot(T_0*t[0::mod],np.real(Ih[0::mod])*I_0*1e6,c=color,ls='-')
-            ax.plot(T_0*t[0::mod],np.imag(Ih[0::mod])*I_0*1e6,c=color,ls='--')
-            ax_abs.plot(T_0*t[0::mod],np.abs(Ih[0::mod])*I_0*1e6,c=color,ls='-')
-
-    if i%2==1:
-        ax.set_ylabel(r'$|I_{%dth}| \, (\mu A)$'%ia[i])
-       #ax.set_yticks([])
+def get_prior(i,reversible):
+    model = model_base
+    prior = pints.Prior()
+    e0_buffer = 0.1*(model.params['Estart'] - model.params['Ereverse'])
+    E0 = 0.5*(model.params['E01'] + model.params['E02'])
+    E0_diff = (i+1.0)*(model.params['Estart'] - model.params['Ereverse'])/float(n)
+    print 'E0_diff (dim) = ',E0_diff*model.E0
+    prior.add_parameter('E01',pints.Normal(E0,(E0_diff)**2),
+            model.params['Ereverse']+e0_buffer,model.params['Estart']-e0_buffer)
+    prior.add_parameter('E02',pints.Normal(E0,(E0_diff)**2),
+            model.params['Ereverse']+e0_buffer,model.params['Estart']-e0_buffer)
+    E1 = 0.5*(model.params['E11'] + model.params['E12'])
+    E1_diff = E0_diff
+    prior.add_parameter('E11',pints.Normal(E1,(E1_diff)**2),
+            model.params['Ereverse']+e0_buffer,model.params['Estart']-e0_buffer)
+    prior.add_parameter('E12',pints.Normal(E1,(E1_diff)**2),
+            model.params['Ereverse']+e0_buffer,model.params['Estart']-e0_buffer)
+    E2 = 0.5*(model.params['E21'] + model.params['E22'])
+    E2_diff = E0_diff
+    prior.add_parameter('E21',pints.Normal(E2,(E2_diff)**2),
+            model.params['Ereverse']+e0_buffer,model.params['Estart']-e0_buffer)
+    prior.add_parameter('E22',pints.Normal(E2,(E2_diff)**2),
+            model.params['Ereverse']+e0_buffer,model.params['Estart']-e0_buffer)
+    prior.add_parameter('Cdl',pints.Uniform(),0,20)
+    if reversible:
+        prior.add_parameter('k01',pints.Uniform(),0,10000)
+        prior.add_parameter('k02',pints.Uniform(),0,10000)
+        prior.add_parameter('k11',pints.Uniform(),0,10000)
+        prior.add_parameter('k12',pints.Uniform(),0,10000)
+        prior.add_parameter('k21',pints.Uniform(),0,10000)
+        prior.add_parameter('k22',pints.Uniform(),0,10000)
     else:
-        ax.set_ylabel(r'$I_{%dth} \, (\mu A)$'%ia[i])
-    if int(i/2)<4:
-        ax.set_xticks([])
-    else:
-        ax.set_xlabel('$t \, (s)$')
-                                                                                                        #axs[0].legend()
-f.tight_layout()
-f.savefig('fit_pom_harmonics.pdf')
-fabs.tight_layout()
-fabs.savefig('fit_pom_harmonics_abs.pdf')
+        names = ['k01','k02','k11','k12','k21','k22']
+        model.set_params_from_vector([1e10 for name in names],names)
+
+    prior.add_parameter('Ru',pints.Uniform(),0,0.1)
+
+    omega_est = model.params['omega']
+    prior.add_parameter('omega',pints.Normal(omega_est,(omega_est*0.01)**2),0.9*omega_est,1.1*omega_est)
+    prior.add_parameter('phase',pints.Normal(model.params['phase'],(pi/10.0)**2),-pi/5,pi/5)
+    prior.add_parameter('gamma',pints.Uniform(),0.1,10.0)
+
+    return prior
 
 
-plt.figure()
-plt.plot(t,I,alpha=0.5)
-plt.plot(data.time,data.current,alpha=0.5)
-plt.savefig('fit_pom.pdf')
-plt.close()
+priors = []
+run_names = []
+n = 30
+for i in range(n):
+    prior = get_prior(i,False)
+    priors.append(prior)
+    run_names.append('quasi_reversible_%d'%i)
+
+for i in range(n):
+    prior = get_prior(i,True)
+    priors.append(prior)
+    run_names.append('reversible_%d'%i)
+
+for dir_name_base,prior_base in zip(run_names,priors):
+    if not os.path.exists(dir_name_base):
+        os.makedirs(dir_name_base)
+
+    data_log_likelihoods = np.zeros(30,'float')
+    for i in range(30):
+        dir_name = '%s/sample_%d'%(dir_name_base,i)
+        model = copy.copy(model_base)
+        prior = copy.copy(prior_base)
+
+        if not os.path.exists(dir_name):
+            os.makedirs(dir_name)
+        f = open('%s/out'%dir_name,'w')
+        sys.stdout = f
+
+        print 'std devations are:'
+        for name in ['E01','E02','E11','E12','E21','E22']:
+            print '\t',name,': ',math.sqrt(prior.data[name][0].variance)
+
+
+        print 'before cmaes, parameters are:'
+        names = prior.get_parameter_names()
+        v = np.zeros(len(names))
+        for i in range(len(names)):
+            v[i] = model.params[names[i]]
+            print names[i],': ',model.params[names[i]]
+
+        print 'param loglikelihood is currently',prior.log_likelihood(v,names)
+
+        pints.fit_model_with_cmaes(data,model,prior)
+
+
+        print 'after cmaes, parameters are:'
+        names = prior.get_parameter_names()
+        for name in prior.get_parameter_names():
+            print name,': ',model.params[name]
+
+        print 'after cmaes, dim parameters are:'
+
+        names = prior.get_parameter_names()
+        for name in prior.get_parameter_names():
+            print name,': ',model.dim_params[name]
+
+        I,t = model.simulate(use_times=data.time)
+
+        data_log_likelihoods[i] = data.log_likelihood(I,1)
+
+        print 'data log_likelihood = ',data_log_likelihoods[i]
+
+        pickle.dump( (model,prior,dir_name), open( '%s/model_prior_dir_name.p'%dir_name, "wb" ) )
+
+        t = np.array(t)
+        F = (fft.fft(I),fft.fft(data.current))
+        dt = t[1]-t[0]
+        signal_f = model.params['omega']/(2*pi)
+        ia = np.array([1,2,3,4,5,6,7,8])
+        hs = ia*signal_f
+        lowcut = hs - signal_f/4
+        highcut = hs + signal_f/4
+        f,axs = plt.subplots(4,2,figsize = (10,13))
+        fabs,axs_abs = plt.subplots(4,2,figsize = (10,13))
+        colors = ['blue','red']
+
+        weights = np.zeros(len(I))
+        nyq = 0.5/dt
+        mod = 1
+        T_0 = model.T0
+        I_0 = model.I0
+        for i in range(len(ia)):
+            print 'doing subplot',int(i/2),',',i%2
+            cfreq = int(len(F[0]) * hs[i]/nyq/2)
+            band_low = int(lowcut[i]/nyq*len(F[0])/2)
+            band_high = int(highcut[i]/nyq*len(F[0])/2)
+            weights[:] = 0.0
+            weights[band_low:band_high] = 2.0
+            ax = axs[int(i/2),i%2]
+            ax_abs = axs_abs[int(i/2),i%2]
+            for color,FI in zip(colors,F):
+                Ih = FI*weights
+                Ih = np.concatenate((Ih[cfreq:],Ih[0:cfreq]))
+                Ih = fft.ifft(Ih)
+
+                if len(I)%2 == 0:
+                    ax.plot(t[0::mod]*T_0,np.real(Ih[0::mod])*I_0*1e6,c=color,ls='-')
+                    ax.plot(t[0::mod]*T_0,np.imag(Ih[0::mod])*I_0*1e6,c=color,ls='--')
+                    ax_abs.plot(t[0::mod]*T_0,np.abs(Ih[0::mod])*I_0*1e6,c=color,ls='-')
+                else:
+                    ax.plot(T_0*t[0::mod],np.real(Ih[0::mod])*I_0*1e6,c=color,ls='-')
+                    ax.plot(T_0*t[0::mod],np.imag(Ih[0::mod])*I_0*1e6,c=color,ls='--')
+                    ax_abs.plot(T_0*t[0::mod],np.abs(Ih[0::mod])*I_0*1e6,c=color,ls='-')
+
+            if i%2==1:
+                ax.set_ylabel(r'$|I_{%dth}| \, (\mu A)$'%ia[i])
+               #ax.set_yticks([])
+            else:
+                ax.set_ylabel(r'$I_{%dth} \, (\mu A)$'%ia[i])
+            if int(i/2)<4:
+                ax.set_xticks([])
+            else:
+                ax.set_xlabel('$t \, (s)$')
+                                                                                                                #axs[0].legend()
+        f.tight_layout()
+        f.savefig('%s/fit_pom_harmonics.pdf'%dir_name)
+        fabs.tight_layout()
+        fabs.savefig('%s/fit_pom_harmonics_abs.pdf'%dir_name)
+
+
+        plt.figure()
+        plt.plot(t,I,alpha=0.5)
+        plt.plot(data.time,data.current,alpha=0.5)
+        plt.savefig('%s/fit_pom.pdf'%dir_name)
+        plt.close()
+
+    pickle.dump( (data_log_likelihoods), open( '%s/data_log_likelihoods.p'%dir_name_base, "wb" ) )
 
 
 
