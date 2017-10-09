@@ -398,7 +398,200 @@ of 17 parameters to be estimated by automated data optimization and 15
 heuristically under circumstances where there are imperfections and 
 uncertainties in each aspect of the model as noted above 
 
-Martin to add model details in terms of A, B, C, D, E, and F species and math’s
+The sequence of six electron transfers (Equations \ref{eq:ox_to_i} and 
+\ref{eq:i_to_red} for Process I, II and II) are modelled by the sequence of 
+quasi-reversible reactions
+
+\begin{align} \label{eq:reaction}
+    A + e^- \underset{k^1_{red}(t)}{\overset{k^1_{ox}(t)}{\rightleftarrows}} B, 
+    \\
+    B + e^- \underset{k^2_{red}(t)}{\overset{k^2_{ox}(t)}{\rightleftarrows}} C, 
+    \\
+    C + e^- \underset{k^3_{red}(t)}{\overset{k^3_{ox}(t)}{\rightleftarrows}} D, 
+    \\
+    D + e^- \underset{k^4_{red}(t)}{\overset{k^4_{ox}(t)}{\rightleftarrows}} E, 
+    \\
+    E + e^- \underset{k^5_{red}(t)}{\overset{k^5_{ox}(t)}{\rightleftarrows}} F, 
+    \\
+    F + e^-  \underset{k^6_{red}(t)}{\overset{k^6_{ox}(t)}{\rightleftarrows}} G,
+\end{align}
+
+where the forward and backwards reaction rates are given by the Butler-Volmer 
+equations
+
+$$
+k^i_{red}(t) = k^0_i \exp\left(-\frac{\alpha_i F}{RT} [E_r(t) - E^0_i] \right),
+$$
+$$
+k^i_{ox}(t) = k^0_i \exp\left((1-\alpha_i)\frac{F}{RT} [E_r(t) - E^0_i] \right).
+$$
+
+The reduced voltage $E_r(t)$ is the input voltage $E(t)$ minus the voltage due 
+to resistance $R_u$.
+
+$$
+E_r(t) = E(t) - R_u I_{tot}(t)
+$$
+
+and the input voltage is the sum of dc and ac components
+
+$$
+E(t) = E_{dc}(t) + dE\sin(\omega t + \eta)
+$$
+
+$$
+E_{dc}(t) = \left. \begin{cases} E_{start} + vt, & \text{for } 0 \le t < t_r\\
+E_{reverse} - v(t-t_r), & \text{for } t_r \le t
+\end{cases} \right. ,
+$$
+
+$$
+t_r = \frac{E_{reverse}-E_{start}}{v}
+$$
+
+Let $\mathbf{\theta} = (\theta_1,\theta_2,\theta_3,\theta_4,\theta_5)$ be the 
+proportion of $(A,B,C,D,E,F)$ on the surface of the electrode, where 
+conservation of the total gives the proportion of $G$ as 
+$1-\theta_1-\theta_2-\theta_3-\theta_4-\theta_5$. The ODE governing the 
+behaviour of $\mathbf{\theta}$ is given by
+
+$$
+\frac{d\mathbf{\theta}}{dt} = K \mathbf{\theta}
+$$
+
+where the stoichiometry matrix $K$ is given by
+
+$$
+\begin{pmatrix}
+0
+\end{pmatrix}
+
+
+k^1_{ox}(1-\theta_1-\theta_2) - k^1_{red}\theta_1.
+$$
+
+$$
+\frac{d\theta_2}{dt} = k^2_{red}(1-\theta_1-\theta_2) - k^2_{ox}\theta_2.
+$$
+
+
+The total current measured is the sum of the capacitive and faridaic components
+
+$$
+I_{tot} = I_c + I_f,
+$$
+
+which are given by
+
+$$
+I_c = C_{dl} \left(1 + C_{dl1} E_r(t) + C_{dl2} E_r^2(t) + C_{dl3} 
+E_r^3(t)\right) \frac{dE_r}{dt},
+$$
+
+$$
+I_f = F a \Gamma \left( \frac{d\theta_1}{dt} - \frac{d\theta_2}{dt} \right).
+$$
+
+Thermodynamic Dispersion
+========================
+
+Thermodynamic dispersion is the result of different molecules at the electrode 
+surface having different reversible potentials $E_0$. Given a probability 
+distribution for $E_0$, $p(E_0)$, we can calculate the average current of a 
+population of molecules by finding the expected value of $I_{tot}$
+
+$$
+I_{tot}(t) = \int_{E_0} I_{tot}(t,E_0)p(E_0) dE_0.
+$$
+
+Given the cumulative distribution $F(E_0)$ corresponding to $p(E_0)$, and a 
+mapping function $\alpha = F(E_0)$, we can map this integral, over an infinite 
+domain, into the finite domain $0 \le \alpha < 1$ 
+
+$$
+I_{tot}(t) = \int_{\alpha} I_{tot}(t,F^{-1}(\alpha)) d\alpha.
+$$
+
+Note that the probability distribution in terms of $\alpha$ is now $p(\alpha) = 
+1$, and we assume that the inverse mapping $F^{-1}(\alpha)$ exists.
+
+To numerically evaluate the integral, we chose a set of quadrature points using 
+the Sobol quasi-random sequence [@sobol1967distribution], which generates a low 
+discrepancy pseudo-random sequence of $N$ points over $0 \le \alpha < 1$, with 
+quadrature weights equal to $w=1/N$. The integral thus becomes
+
+$$
+I_{tot}(t) = \frac{1}{N} \sum_i^N I_{tot}(t,F^{-1}(\alpha_i)).
+$$
+
+Through numerical experiments we have determined that the accuracy of this 
+integral converges sufficiently with $N>128$ points.
+
+
+Dimensionless Equations and Numerical Solution
+==============================================
+
+The model equations can be represented using dimensionless variables $i = 
+I/I_0$, $\epsilon = E/E_0$ and $\tau = t/T_0$. Substituting these into the model 
+and setting
+
+$$
+E_0 = \frac{RT}{F}, \quad T_0 = \frac{E_0}{v}, \quad I_0 = \frac{Fa\Gamma}{T_0},
+$$
+
+gives the dimensionless equations
+
+$$
+\frac{d\theta_1}{d\tau} = \kappa^0_1 \left( (1-\theta_1-\theta_2) 
+\exp^{(1-\alpha_1) (\epsilon_r 
+- \epsilon^0_1)} 
+- \theta_1 \exp^{-\alpha_1(\epsilon_r - \epsilon^0_1)} \right),
+$$
+
+$$
+\frac{d\theta_2}{d\tau} = \kappa^0_2 \left( (1-\theta_1-\theta_2) 
+\exp^{-\alpha_2 (\epsilon_r 
+- \epsilon^0_2)} 
+- \theta_2 \exp^{(1-\alpha_2)(\epsilon_r - \epsilon^0_2)} \right),
+$$
+
+
+$$
+i = \gamma \left(1 + \gamma_1 \epsilon_r + \gamma_2 \epsilon_r^2 
++ \gamma_3 \epsilon_r^3\right) \frac{d\epsilon_r}{d\tau} 
+  + \left(\frac{d\theta_1}{d\tau}-\frac{d\theta_1}{d\tau}\right),
+$$
+
+where 
+
+$$
+\epsilon_r = \epsilon - \rho i,
+$$
+
+$$
+\epsilon = \epsilon_{start} + t + d\epsilon \sin(\omega t + \eta).
+$$
+
+The dimensionless parameters $\gamma$, $\rho$, $\kappa^0_i$ and $\epsilon^0_i$ 
+are the dimensionless double layer capacitance, uncompensated resistance, 
+reaction kinetics parameter and reversible potential. The unknown time dependent 
+variables $\theta_1(t)$, $\theta_2(t)$, $i(t)$, are the dimensionless proportion 
+of $A$, $C$, and total current respectively. The input AC signal is 
+parameterised by its dimensionless amplitude $d\epsilon$, angular frequency 
+$\omega$ and phase $\eta$.
+
+To solve these equations, we discritise the time derivatives $d\theta_i/d\tau$ 
+and $di/d\tau$ using the implicit Euler method. Substituting this back into the 
+equation for $i$ gives an implicit equation in terms of $\theta_i^{n+1}$, 
+$\theta_i^{n}$, $i^{n+1}$ and $i^{n}$, which was solved using the Newton-Raphson 
+method implemented in the Boost C++ library.
+
+In order to compare the simulated result to the experimental data, linear 
+interpolation between $i^{n+1}$ and $i^{n}$ was performed to give the value of 
+$i(\tau_i)$ at each experimental time point $\tau_i$. Figure X gives an example 
+of the simulation output. 
+
+
 
 \subsection{Heuristic Method of Parameter Estimation}
 
@@ -466,7 +659,7 @@ processes  II and III had variable separations in the $E_{rev}$ ($\Delta E_{rev}
 values from 0 to 55 mV with all $k^0$ and $\alpha$  values being set at 1 x 10 8  
 s-1  and 0.50 respectively to mimic a reversible process  and other parameters 
 set at estimates approximating those deduced in (a), (b) and (c) above.  Greater 
-crossover potentials   than 55 mV were deemed unreasonable. By eye, and with 
+crossover potentials   than 53 mV were deemed unreasonable. By eye, and with 
 some fine tuning, $\Delta E_{rev} = 30$, 0 and 27  for process I, II and III 
 respectively gave match of theory and experiment for the 9Hz low frequency data 
 set. To confirm that the assumption of reversibility is valid and what this 
@@ -490,7 +683,7 @@ only  pairs of ko values are the along with the surface coverage scaling factor
 $\Gamma$ remain as unknowns. After much tedious trial and error examining many 
 simulations, the reasonably good match of theory and experimental data shown in 
 figure x was obtained for the total current data and in figure y for AC 
-harmonics 1 to 4 when the parameters summarized in Table 1 and in captions to 
+harmonics -1 to 4 when the parameters summarized in Table 1 and in captions to 
 these Figures are used.  Never the less, the significance of the absolute ko 
 values deduced from this exercise and included in Table 1 remains unclear, apart 
 from implying  that fast electrode kinetics  approaching the reversible limit is 
@@ -505,114 +698,56 @@ Indeed, it will emerge from this exercise that a hybrid approach based using
 knowledge obtained above heuristically, supported by computationally efficient 
 data optimization are needed to obtain chemically sensible outcomes.
 
-
-\subsection{Mathematical Modelling}
-
-The details of the mathematical and computational modelling approach that we 
-have taken in this paper were given previously in 
-\cite{Morrisetal,gavaghan2017}. In summary, our chosen experimental system is 
-modelled as a quasi-reversible reaction 
-
-\begin{align} \label{reaction}
-A \cee{&<=>[E^0,k^0,\alpha]} B + e^-, 
-\end{align}
-
-where species $A$ and $B$ are in solution, and $E^0$, $k^0$, and $\alpha$  are 
-the reversible formal potential, standard heterogeneous charge transfer rate 
-constant at $E^0$ and the charge transfer coefficient, respectively, and we 
-assume that the Butler-Volmer formalism is used to describe the electron 
-transfer process 
-\cite{BardFaulkner,brett1993principles,pletcher2001instrumental}. We assume that 
-both convection and migration can be neglected since we are using a macrodisk 
-stationary electrode, and an excess of supporting electrolyte respectively.  
-Since we assume equal diffusion coefficients for each species $A$ and $B$ ($D_A 
-= D_B = D$) we need solve for the concentration of only one of the species  
-(i.e. the concentrations $c_A$, $c_B$ of species $A$ and $B$ satisfy $c_A   = 
-c_{\infty} - c_B $, where $c_\infty$ is the bulk concentration of species $A$) 
-and we choose to solve for species $A$. We can then use Fick's second law to 
-model the variation with time of species $A$ via
-
-\begin{align}
-\frac{\partial c_A}{\partial t} &= D \frac{\partial^2 c_A}{\partial x^2}, \label{diffeqtn}
-\end{align}
-
-where $x$ is distance from the electrode surface and $t$ is time. The initial 
-and boundary conditions are 
-
-\begin{align}
-c_A(x,0) &= c_{\infty} \nonumber \\
-c_A &\rightarrow c_{\infty},  \quad \text{as} \quad x \rightarrow \infty,\quad t>0. \label{icsandbcs}
-\end{align}
-
-At the electrode surface, $x=0$, for $t>0$, we have the conservation and flux conditions
-
-\begin{align}
-D \frac{\partial c_A}{\partial x}=\frac{I_f}{FS}, \label{fluxatelectrode}
-\end{align}
-
-along with the Butler-Volmer condition
-
-\begin{align}
-D \frac{\partial c_A}{\partial x} = \text{ }&k^0 \left[c_A\exp\left((1-\alpha )\frac{F}{RT}(E_{\mbox{\tiny eff}}(t)-E^0)\right)\right.
-\left.-(1-c_A)\exp\left(-\alpha\frac{F}{RT}(E_{\mbox{\tiny eff}}(t)-E^0)\right)\right]. \label{BVeqtn}
-\end{align}
-
-Here, $I_f$ is the faradaic current, $S$ is the electrode area, and 
-$E_{\mbox{\tiny eff}}(t)$ is the {\em effective} applied potential (defined 
-below).
-
-We complete the model by defining $E_{\mbox{\tiny{app}}}(t)$ to be the applied 
-potential, then for the case of AC voltammetry ramp we have
-
-\begin{align}
-E_{\mbox{\tiny{app}}}(t) =E_{\mbox{\tiny{start}}} \pm (v t + \Delta E \sin {(\omega t)}), \qquad 0   \label{EAC}
-\end{align}
-
-where $v$ is the sweep rate,  $E_{\mbox{\tiny{start}}}$ is the initial 
-potential, $t_{\max}$ is the end time of the experiment, and for the AC case, 
-$\omega$ is the radial frequency and  $\Delta E$ the amplitude of the sine wave.  
-The {\em effective} applied potential can now be defined as 
-
-\begin{align}
-E_{\mbox{\tiny{eff}}}(t) = E_{\mbox{\tiny{app}}}(t) - E_{\mbox{\tiny{drop}}} = E_{\mbox{\tiny{app}}}(t) - I_{\mbox{\tiny{tot}}} R_u \nonumber
-\end{align}
-
-where $E_{\mbox{\tiny{drop}}}$ models the effect of uncompensated resistance, 
-$R_u$. $I_{\mbox{\tiny{tot}}}$ is the total (measured) current, and combines the 
-faradaic current and the background capacitive current, $I_c$, which can be 
-modelled as   
-
-\begin{align}
-I_c &= C_{dl}\frac{dE_{\mbox{\tiny{eff}}}}{dt}, \label{Ic}
-\end{align}
-
-where $C_{dl}$ is the double layer capacitance (assumed constant in this work), and then 
-
-\begin{align}
-I_{\mbox{\tiny{tot}}} = I_f + I_c. \label{Itot}
-\end{align}
-
-As described in the introduction in Eqs. \ref{Lambda}, for the case of DC 
-voltammetric methods the values of $k^0$, $D$ and $v$ determine whether the 
-reaction is fully-reversible (large $\Lambda$), quasi-reversible (intermediate 
-$\Lambda$), or irreversible (small $\Lambda$). 
+\begin{figure}[h]
+%\includegraphics[width=\textwidth]{images/ac_volt.pdf}
+    \caption{\it{Simulated fundamental and third harmonic FTAC voltammograms 
+    used to assist in heuristic form of data analysis for the six electron POM 
+    reduction process with designated $E_{rev}$ (mV) values. Simulations 
+    employed $f = 9.0$ Hz, $\Delta E = 20$ mV, $v = 113 mV.s^{-1}$, $E_{start} = 
+    600$ mV, $E_{switch} = -160$ mV, $R_u = 50 \Omega$, $C_{dl} = 6 \mu 
+    F.cm^{-2}$, $T = 298.2$ K, $A = 7.86 \times 10^{-3} cm^2$, and $\Gamma = 53 
+    pmole.cm^{-2}$, all $k_0 = 1 \times 10^8 s^{-1}$ and $\alpha =0.50$, and 
+    designated $\Delta E_0$ values for first and third processes with fixed 
+    value of  $\Delta E_{rev} = 0$ mV for second process.}}
+    \label{fig:sim_for_heuristic_E}
+\end{figure}
 
 
-Equations \ref{diffeqtn}--\ref{Itot} are non-dimensionalised as described in the 
-supplementary information. The resulting non-dimensional system of equations is 
-solved using an implicit finite difference method with an exponentially 
-expanding grid (as we have described in full detail previously - see 
-\cite{Sheretal}). Having derived the governing partial differential equations 
-and boundary conditions for this simplest problem of the reaction mechanism in 
-Eq. \ref{reaction} we can see mathematically that the mechanism is governed by 
-five parameters $(k^0, E^0, \alpha, R_u, C_{dl})$, and we will collectively 
-denote these parameters by the vector $ \boldsymbol\theta$. The {\em inverse} 
-problem that we wish to solve can be defined as finding the best possible 
-approximation to $\boldsymbol\theta$ given our measured experimental output 
-trace of the current $I_{\mbox{\small{\tiny{tot}}}}^{\mbox{\tiny{data}}}$, 
-versus potential, together with an estimate of the effect of experimental noise.  
-This will be achieved by recovering the marginal posterior distributions of each 
-parameter that are induced by the experimental noise.  
+\begin{figure}[h]
+%\includegraphics[width=\textwidth]{images/ac_volt.pdf}
+    \caption{\it{Simulated fundamental and third harmonic FTAC voltammograms 
+    used to assist in heuristic form of data analysis for the overall six 
+    electron reduction process with designated pairs of $k_{rev} (s^{-1})$ 
+    values for the six-electron POM reduction processes. Simulations employed $f 
+    = 9.0$ Hz, $\Delta E = 20$ mV, $v = 113 mV s^{-1}$, $E_{start} = 600$ mV, 
+    $E_{switch} = -160$ mV, $R_u = 50 \Omega$, $C_{dl} = 6 \mu F.cm^{-2}$, $T = 
+    298.2$ K, $A = 7.86 \times 10^{-3} cm^2$, and $\Gamma = 53 pmole.cm^{-2}$ 
+    and $\Delta E_{rev} = 33$, 0, 45 mV for first to third processes, 
+    respectively.}}
+    \label{fig:sim_for_heuristic_k}
+\end{figure}
+
+\begin{figure}[h]
+\includegraphics[width=\textwidth]{figs/exp_and_sim_harmonics_1_6.pdf}
+    \caption{\it{Comparison of simulated and experimental first to fourth 
+    harmonic FTAC voltammograms obtained for first three reductions process of 
+    \ce{[PMo12O40]3-} adsorbed on a GC in contact with 1.0 M \ce{H2SO4}. AC 
+    experimental data obtained with $f = 60$ Hz, $\Delta E = 20$ mV. Simulated 
+    data obtained with $R_u = 50 \Omega$, $C_{dl} = 8 \mu F.cm^{-2}$, $T = 
+    298.2$ K, $A = 7.07 \times 10^{-3} cm^2$, and $\Gamma = 53 pmole.cm^{-2}$ 
+    and other parameters given in tables and text.}}
+    \label{fig:sim_and_exp}
+\end{figure}
+
+
+\section{Parameter Estimation using Automated Data Optimization Methods --still 
+to be written}
+
+\section{Conclusions --- still to be written}
+
+\section{Acknowledgements}
+
+K.O. acknowledges the award of Endeavour Research Fellowship for financial support that enabled him to undertake this study at Monash University. The authors also would like to thank Miss Sze-yin Tan for helpful discussions on undertaking simulations using MECSim and the Australian research Council for financial assistance in the form of a Discovery Program grant
 
 
 \bibliography{poms.bib}
