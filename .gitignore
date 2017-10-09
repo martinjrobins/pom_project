@@ -1,0 +1,5 @@
+job*.sh
+quasireversible_*
+reversible_*
+slurm*
+build
