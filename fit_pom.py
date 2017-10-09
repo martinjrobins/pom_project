@@ -3,9 +3,12 @@ sys.path.insert(0, 'pints')
 sys.path.insert(0, 'pints/problems/electrochemistry')
 sys.path.insert(0, 'build')
 import pints
-import electrochemistry
+from pints import electrochemistry
 import pickle
 import numpy as np
+import os
+import sys
+import math
 
 import matplotlib as mpl
 #mpl.use('Agg')
@@ -151,7 +154,6 @@ found_parameters, found_solution = pints.cmaes(
     x0,
     sigma0,
     )
-
 
 print('Found solution:          x0:' )
 for k, x in enumerate(found_parameters):

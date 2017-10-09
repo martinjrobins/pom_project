@@ -1,0 +1,43 @@
+#!/bin/bash
+
+python fit_pom.py 0 1 0
+python fit_pom.py 1 2 0
+python fit_pom.py 2 3 0
+python fit_pom.py 3 4 0
+python fit_pom.py 4 5 0
+python fit_pom.py 5 6 0
+python fit_pom.py 6 7 0
+python fit_pom.py 7 8 0
+python fit_pom.py 8 9 0
+python fit_pom.py 9 10 0
+python fit_pom.py 10 11 0
+python fit_pom.py 11 12 0
+python fit_pom.py 12 13 0
+python fit_pom.py 13 14 0
+python fit_pom.py 14 15 0
+python fit_pom.py 15 16 0
+python fit_pom.py 16 16 0
+python fit_pom.py 17 18 0
+python fit_pom.py 18 19 0
+python fit_pom.py 19 20 0
+python fit_pom.py 0 1 1
+python fit_pom.py 1 2 1
+python fit_pom.py 2 3 1
+python fit_pom.py 3 4 1
+python fit_pom.py 4 5 1
+python fit_pom.py 5 6 1
+python fit_pom.py 6 7 1
+python fit_pom.py 7 8 1
+python fit_pom.py 8 9 1
+python fit_pom.py 9 10 1
+python fit_pom.py 10 11 1
+python fit_pom.py 11 12 1
+python fit_pom.py 12 13 1
+python fit_pom.py 13 14 1
+python fit_pom.py 14 15 1
+python fit_pom.py 15 16 1
+python fit_pom.py 16 16 1
+python fit_pom.py 17 18 1
+python fit_pom.py 18 19 1
+python fit_pom.py 19 20 1
+
