@@ -3,9 +3,9 @@
 COUNTER=0
 for reversible in true false
 do
-    for diff_i in `seq 1 10`
+    for diff_i in `seq 0 20`
     do
-        for sample_i in `seq 1 30`
+        for sample_i in `seq 1 20`
         do
              echo $COUNTER
              echo $sample_i
