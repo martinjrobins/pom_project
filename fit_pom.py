@@ -141,21 +141,28 @@ else:
 
 priors = []
 E0 = 0.5*(poms_model.params['E01'] + poms_model.params['E02'])
-E0_diff = (diff_i+1.0)*(poms_model.params['Estart'] - poms_model.params['Ereverse'])/float(30)
-priors.append(pints.NormalPrior(E0,E0_diff**2))
-priors.append(pints.NormalPrior(E0,E0_diff**2))
-E1 = 0.5*(poms_model.params['E11'] + poms_model.params['E12'])
-E1_diff = (diff_i+1.0)*(poms_model.params['Estart'] - poms_model.params['Ereverse'])/float(30)
-priors.append(pints.NormalPrior(E1,E1_diff**2))
-priors.append(pints.NormalPrior(E1,E1_diff**2))
-E2 = 0.5*(poms_model.params['E21'] + poms_model.params['E22'])
-E2_diff = (diff_i+1.0)*(poms_model.params['Estart'] - poms_model.params['Ereverse'])/float(30)
-priors.append(pints.NormalPrior(E2,E2_diff**2))
-priors.append(pints.NormalPrior(E2,E2_diff**2))
-if reversible:
-   priors.append(pints.UniformPrior(lower_bounds[6:8],upper_bounds[6:8]))
+if diff_i < 1000:
+    E0_diff = (diff_i+1.0)*(poms_model.params['Estart'] - poms_model.params['Ereverse'])/float(30)
+    priors.append(pints.NormalPrior(E0,E0_diff**2))
+    priors.append(pints.NormalPrior(E0,E0_diff**2))
+    E1 = 0.5*(poms_model.params['E11'] + poms_model.params['E12'])
+    E1_diff = (diff_i+1.0)*(poms_model.params['Estart'] - poms_model.params['Ereverse'])/float(30)
+    priors.append(pints.NormalPrior(E1,E1_diff**2))
+    priors.append(pints.NormalPrior(E1,E1_diff**2))
+    E2 = 0.5*(poms_model.params['E21'] + poms_model.params['E22'])
+    E2_diff = (diff_i+1.0)*(poms_model.params['Estart'] - poms_model.params['Ereverse'])/float(30)
+    priors.append(pints.NormalPrior(E2,E2_diff**2))
+    priors.append(pints.NormalPrior(E2,E2_diff**2))
+    if reversible:
+       priors.append(pints.UniformPrior(lower_bounds[6:8],upper_bounds[6:8]))
+    else:
+       priors.append(pints.UniformPrior(lower_bounds[6:14],upper_bounds[6:14]))
 else:
-   priors.append(pints.UniformPrior(lower_bounds[6:14],upper_bounds[6:14]))
+    if reversible:
+       priors.append(pints.UniformPrior(lower_bounds[0:8],upper_bounds[0:8]))
+    else:
+       priors.append(pints.UniformPrior(lower_bounds[0:14],upper_bounds[0:14]))
+
 
 # Load a forward model
 pints_model = electrochemistry.PintsModelAdaptor(poms_model,names)
