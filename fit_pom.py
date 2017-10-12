@@ -183,13 +183,15 @@ score = pints.BayesianLogLikelihood(prior, log_likelihood)
 boundaries = pints.Boundaries(lower_bounds,upper_bounds)
 
 # Perform an optimization with boundaries and hints
-if reversible:
-   x0 = [E0,E0,E1,E1,E2,E2] \
-        + [0.5*(u-l) for l,u in zip(lower_bounds[6:8],upper_bounds[6:8])]
-else:
-   x0 = [E0,E0,E1,E1,E2,E2] \
-        + [0.5*(u-l) for l,u in zip(lower_bounds[6:14],upper_bounds[6:14])]
-sigma0 = [0.25*(h-l) for l,h in zip(lower_bounds,upper_bounds)]
+#if reversible:
+#   x0 = [E0,E0,E1,E1,E2,E2] \
+#        + [0.5*(u-l) for l,u in zip(lower_bounds[6:8],upper_bounds[6:8])]
+#else:
+#   x0 = [E0,E0,E1,E1,E2,E2] \
+#        + [0.5*(u-l) for l,u in zip(lower_bounds[6:14],upper_bounds[6:14])]
+
+x0 = [0.5*(u+l) for l,u in zip(lower_bounds,upper_bounds)]
+sigma0 = [0.5*(h-l) for l,h in zip(lower_bounds,upper_bounds)]
 
 
 print('log like at x0: ')
