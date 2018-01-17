@@ -171,13 +171,34 @@ pints_model = electrochemistry.PintsModelAdaptor(poms_model,names)
 problem = pints.SingleSeriesProblem(pints_model, data.time, data.current)
 
 # Create a log-likelihood function scaled by n
-log_likelihood = pints.ScaledLogLikelihood(pints.UnknownNoiseLogLikelihood(problem))
+log_likelihood = pints.UnknownNoiseLogLikelihood(problem)
 
 # Create a uniform prior over both the parameters and the new noise variable
 prior = pints.ComposedPrior(*priors)
 
+class BayesianScore(pints.LogLikelihood):
+    def __init__(self, prior, log_likelihood):
+        self._prior = prior
+        self._log_likelihood = log_likelihood
+        self._problem = log_likelihood._problem
+
+        # Check dimension
+        self._dimension = self._prior.dimension()
+        if self._log_likelihood.dimension() != self._dimension:
+            raise ValueError('Given prior and log-likelihood must have same'
+                ' dimension')
+
+    def __call__(self, x):
+        # Evaluate prior first, assuming this is very cheap
+        prior = self._prior(x)
+        if prior == 0:
+            return float('inf')
+        # Take log and add conditional log-likelihood
+        return -np.log(prior) - self._log_likelihood(x)/self._log_likelihood._size
+
+
 # Create a Bayesian log-likelihood (prior * likelihood)
-score = pints.BayesianLogLikelihood(prior, log_likelihood)
+score = BayesianScore(prior, log_likelihood)
 
 # Select some boundaries
 boundaries = pints.Boundaries(lower_bounds,upper_bounds)
