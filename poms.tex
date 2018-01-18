@@ -17,7 +17,7 @@ marginparwidth=1.5cm, marginparsep=0.4cm, margin=2.5cm]{geometry}
 \usepackage{amsmath}  % Math fonts
 \usepackage{amsfonts} %
 \usepackage{amssymb}  %
-\usepackage{mathscinet,amsthm,amssymb,subcaption,graphicx,epstopdf,multicol}
+\usepackage{mathscinet,amsthm,amssymb,subcaption,graphicx,epstopdf,multicol,bm}
 \usepackage{color}
 
 %Chris packages%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -403,26 +403,26 @@ The sequence of six electron transfers (Equations \ref{eq:ox_to_i} and
 quasi-reversible reactions
 
 \begin{align} \label{eq:reaction}
-    A + e^- \underset{k^1_{red}(t)}{\overset{k^1_{ox}(t)}{\rightleftarrows}} B, 
+    A + e^- \underset{k^1_{ox}(t)}{\overset{k^1_{red}(t)}{\rightleftarrows}} B, 
     \\
-    B + e^- \underset{k^2_{red}(t)}{\overset{k^2_{ox}(t)}{\rightleftarrows}} C, 
+    B + e^- \underset{k^2_{ox}(t)}{\overset{k^2_{red}(t)}{\rightleftarrows}} C, 
     \\
-    C + e^- \underset{k^3_{red}(t)}{\overset{k^3_{ox}(t)}{\rightleftarrows}} D, 
+    C + e^- \underset{k^3_{ox}(t)}{\overset{k^3_{red}(t)}{\rightleftarrows}} D, 
     \\
-    D + e^- \underset{k^4_{red}(t)}{\overset{k^4_{ox}(t)}{\rightleftarrows}} E, 
+    D + e^- \underset{k^4_{ox}(t)}{\overset{k^4_{red}(t)}{\rightleftarrows}} E, 
     \\
-    E + e^- \underset{k^5_{red}(t)}{\overset{k^5_{ox}(t)}{\rightleftarrows}} F, 
+    E + e^- \underset{k^5_{ox}(t)}{\overset{k^5_{red}(t)}{\rightleftarrows}} F, 
     \\
-    F + e^-  \underset{k^6_{red}(t)}{\overset{k^6_{ox}(t)}{\rightleftarrows}} G,
+    F + e^-  \underset{k^6_{ox}(t)}{\overset{k^6_{red}(t)}{\rightleftarrows}} G,
 \end{align}
 
 where the forward and backwards reaction rates are given by the Butler-Volmer 
 equations
 
-$$
+$$ \label{eq:rate1}
 k^i_{red}(t) = k^0_i \exp\left(-\frac{\alpha_i F}{RT} [E_r(t) - E^0_i] \right),
 $$
-$$
+$$ \label{eq:rate2}
 k^i_{ox}(t) = k^0_i \exp\left((1-\alpha_i)\frac{F}{RT} [E_r(t) - E^0_i] \right).
 $$
 
@@ -449,30 +449,63 @@ $$
 t_r = \frac{E_{reverse}-E_{start}}{v}
 $$
 
-Let $\mathbf{\theta} = (\theta_1,\theta_2,\theta_3,\theta_4,\theta_5)$ be the 
-proportion of $(A,B,C,D,E,F)$ on the surface of the electrode, where 
+Let $\bm{\theta} = (\theta_1,\theta_2,\theta_3,\theta_4,\theta_5,\theta_6)$ be 
+the proportion of $(A,B,C,D,E,F)$ on the surface of the electrode, where 
 conservation of the total gives the proportion of $G$ as 
-$1-\theta_1-\theta_2-\theta_3-\theta_4-\theta_5$. The ODE governing the 
-behaviour of $\mathbf{\theta}$ is given by
+$1-\theta_1-\theta_2-\theta_3-\theta_4-\theta_5-\theta_6$. 
+
+The ODE governing the behaviour of $\bm{\theta}$ is given by
 
 $$
-\frac{d\mathbf{\theta}}{dt} = K \mathbf{\theta}
+\label{eq:ode}
+\frac{d\bm{\theta}}{dt} = K \bm{\theta} + \mathbf{c}
 $$
 
 where the stoichiometry matrix $K$ is given by
 
 $$
-\begin{pmatrix}
-0
-\end{pmatrix}
-
-
-k^1_{ox}(1-\theta_1-\theta_2) - k^1_{red}\theta_1.
+K = \begin{pmatrix}
+    - k^1_{red} & k^1_{ox} & 0 & 0 & 0 & 0 \\
+      k^1_{red} & -k^2_{red}-k^1_{ox} & k^2_{ox} & 0 & 0 & 0 \\
+      0 & k^2_{red} & -k^3_{red}-k^2_{ox} & k^3_{ox} & 0 & 0 & 0 \\
+      0 & 0 & k^3_{red} & -k^4_{red}-k^3_{ox} &  k^4_{ox} & 0 \\
+      0 & 0 & 0 & k^4_{red} & -k^5_{red}-k^4_{ox} & k^5_{ox} \\
+      -k^6_{ox} & -k^6_{ox} & -k^6_{ox} & -k^6_{ox} & k^5_{red} -k^6_{ox}& 
+      -k^6_{red}-k^5_{ox} -k^6_{ox}\\
+\end{pmatrix},
 $$
 
+and the vector $\mathbf{c}$ arrises due to the $1$ in the proportion of $G$, and 
+is given by
+
 $$
-\frac{d\theta_2}{dt} = k^2_{red}(1-\theta_1-\theta_2) - k^2_{ox}\theta_2.
+\mathbf{c} = \begin{pmatrix}
+    0 \\
+    0 \\
+    0 \\
+    0 \\
+    0 \\
+    k^6_{ox} \\
+\end{pmatrix}.
 $$
+
+We use a backwards euler discretisation of the time gradent in Eq.~\ref{eq:ode}
+
+$$
+\frac{\bm{\theta}^{n+1} - \bm{\theta}^{n}}{\delta t} = K \bm{\theta}^{n+1} +
+\mathbf{c}
+$$
+
+With the exception that the total current was treated explicity. That is, 
+$I_{tot}^n$ was used to calculate $K$. This leads to the following linear system 
+to be solved at each timestep
+
+$$
+(I - \delta t K)\bm{\theta}^{n+1} = \bm{\theta}^n + \delta t \mathbf{c}
+$$
+
+where $\delta t$ is the timestep, and $\bm{\theta}^n$ is the proportion vector 
+at timestep $n$.
 
 
 The total current measured is the sum of the capacitive and faridaic components
@@ -489,108 +522,22 @@ E_r^3(t)\right) \frac{dE_r}{dt},
 $$
 
 $$
-I_f = F a \Gamma \left( \frac{d\theta_1}{dt} - \frac{d\theta_2}{dt} \right).
+I_f = F a \Gamma \frac{de}{dt}.
 $$
 
-Thermodynamic Dispersion
-========================
-
-Thermodynamic dispersion is the result of different molecules at the electrode 
-surface having different reversible potentials $E_0$. Given a probability 
-distribution for $E_0$, $p(E_0)$, we can calculate the average current of a 
-population of molecules by finding the expected value of $I_{tot}$
+where the change of charge with time is given by
 
 $$
-I_{tot}(t) = \int_{E_0} I_{tot}(t,E_0)p(E_0) dE_0.
+\frac{de}{dt} = 
+\begin{pmatrix}
+    -k^1_{red}-k^6_{ox} \\
+    k^1_{ox}-k^2_{red}-k^6_{ox} \\
+    k^2_{ox}-k^3_{red}-k^6_{ox} \\
+    k^3_{ox}-k^4_{red}-k^6_{ox} \\
+    k^4_{ox}-k^5_{red}-k^6_{ox} \\
+    k^5_{ox}-k^6_{red}-k^6_{ox}
+\end{pmatrix}^T \bm{\theta} +  k^6_{ox} 
 $$
-
-Given the cumulative distribution $F(E_0)$ corresponding to $p(E_0)$, and a 
-mapping function $\alpha = F(E_0)$, we can map this integral, over an infinite 
-domain, into the finite domain $0 \le \alpha < 1$ 
-
-$$
-I_{tot}(t) = \int_{\alpha} I_{tot}(t,F^{-1}(\alpha)) d\alpha.
-$$
-
-Note that the probability distribution in terms of $\alpha$ is now $p(\alpha) = 
-1$, and we assume that the inverse mapping $F^{-1}(\alpha)$ exists.
-
-To numerically evaluate the integral, we chose a set of quadrature points using 
-the Sobol quasi-random sequence [@sobol1967distribution], which generates a low 
-discrepancy pseudo-random sequence of $N$ points over $0 \le \alpha < 1$, with 
-quadrature weights equal to $w=1/N$. The integral thus becomes
-
-$$
-I_{tot}(t) = \frac{1}{N} \sum_i^N I_{tot}(t,F^{-1}(\alpha_i)).
-$$
-
-Through numerical experiments we have determined that the accuracy of this 
-integral converges sufficiently with $N>128$ points.
-
-
-Dimensionless Equations and Numerical Solution
-==============================================
-
-The model equations can be represented using dimensionless variables $i = 
-I/I_0$, $\epsilon = E/E_0$ and $\tau = t/T_0$. Substituting these into the model 
-and setting
-
-$$
-E_0 = \frac{RT}{F}, \quad T_0 = \frac{E_0}{v}, \quad I_0 = \frac{Fa\Gamma}{T_0},
-$$
-
-gives the dimensionless equations
-
-$$
-\frac{d\theta_1}{d\tau} = \kappa^0_1 \left( (1-\theta_1-\theta_2) 
-\exp^{(1-\alpha_1) (\epsilon_r 
-- \epsilon^0_1)} 
-- \theta_1 \exp^{-\alpha_1(\epsilon_r - \epsilon^0_1)} \right),
-$$
-
-$$
-\frac{d\theta_2}{d\tau} = \kappa^0_2 \left( (1-\theta_1-\theta_2) 
-\exp^{-\alpha_2 (\epsilon_r 
-- \epsilon^0_2)} 
-- \theta_2 \exp^{(1-\alpha_2)(\epsilon_r - \epsilon^0_2)} \right),
-$$
-
-
-$$
-i = \gamma \left(1 + \gamma_1 \epsilon_r + \gamma_2 \epsilon_r^2 
-+ \gamma_3 \epsilon_r^3\right) \frac{d\epsilon_r}{d\tau} 
-  + \left(\frac{d\theta_1}{d\tau}-\frac{d\theta_1}{d\tau}\right),
-$$
-
-where 
-
-$$
-\epsilon_r = \epsilon - \rho i,
-$$
-
-$$
-\epsilon = \epsilon_{start} + t + d\epsilon \sin(\omega t + \eta).
-$$
-
-The dimensionless parameters $\gamma$, $\rho$, $\kappa^0_i$ and $\epsilon^0_i$ 
-are the dimensionless double layer capacitance, uncompensated resistance, 
-reaction kinetics parameter and reversible potential. The unknown time dependent 
-variables $\theta_1(t)$, $\theta_2(t)$, $i(t)$, are the dimensionless proportion 
-of $A$, $C$, and total current respectively. The input AC signal is 
-parameterised by its dimensionless amplitude $d\epsilon$, angular frequency 
-$\omega$ and phase $\eta$.
-
-To solve these equations, we discritise the time derivatives $d\theta_i/d\tau$ 
-and $di/d\tau$ using the implicit Euler method. Substituting this back into the 
-equation for $i$ gives an implicit equation in terms of $\theta_i^{n+1}$, 
-$\theta_i^{n}$, $i^{n+1}$ and $i^{n}$, which was solved using the Newton-Raphson 
-method implemented in the Boost C++ library.
-
-In order to compare the simulated result to the experimental data, linear 
-interpolation between $i^{n+1}$ and $i^{n}$ was performed to give the value of 
-$i(\tau_i)$ at each experimental time point $\tau_i$. Figure X gives an example 
-of the simulation output. 
-
 
 
 \subsection{Heuristic Method of Parameter Estimation}

@@ -85,6 +85,7 @@ else:
          'k22',
          'gamma']
 
+
 e0_buffer = 0.1*(poms_model.params['Estart'] - poms_model.params['Ereverse'])
 max_current = np.max(data.current)
 max_k0 = poms_model.non_dimensionalise(10000,'k01')
@@ -172,12 +173,25 @@ problem = pints.SingleSeriesProblem(pints_model, data.time, data.current)
 
 # Create a log-likelihood function scaled by n
 log_likelihood = pints.UnknownNoiseLogLikelihood(problem)
+#score = pints.RMSError(problem)
+print 'log_like dim = ',log_likelihood.dimension()
 
 # Create a uniform prior over both the parameters and the new noise variable
 prior = pints.ComposedPrior(*priors)
+print 'prior dim = ',prior.dimension()
 
-class BayesianScore(pints.LogLikelihood):
-    def __init__(self, prior, log_likelihood):
+
+class BayesianScore(pints.ErrorMeasure):
+    """
+    Inverts a log-likelihood to use it as an error.
+    """
+    def __init__(self, prior,log_likelihood):
+        if not isinstance(log_likelihood, pints.LogLikelihood):
+            raise ValueError('Argument to LikelihoodBasedError must be'
+                ' instance of Likelihood')
+
+        super(BayesianScore, self).__init__(log_likelihood._problem)
+
         self._prior = prior
         self._log_likelihood = log_likelihood
         self._problem = log_likelihood._problem
@@ -188,20 +202,25 @@ class BayesianScore(pints.LogLikelihood):
             raise ValueError('Given prior and log-likelihood must have same'
                 ' dimension')
 
+
     def __call__(self, x):
         # Evaluate prior first, assuming this is very cheap
         prior = self._prior(x)
         if prior == 0:
             return float('inf')
         # Take log and add conditional log-likelihood
-        return -np.log(prior) - self._log_likelihood(x)/self._log_likelihood._size
+        log_like = self._log_likelihood(x)
+        return -np.log(prior) - self._log_likelihood(x)
+
 
 
 # Create a Bayesian log-likelihood (prior * likelihood)
 score = BayesianScore(prior, log_likelihood)
+print 'score dim = ',score._dimension
 
 # Select some boundaries
 boundaries = pints.Boundaries(lower_bounds,upper_bounds)
+print 'boundaries dim = ',boundaries._dimension
 
 # Perform an optimization with boundaries and hints
 #if reversible:
