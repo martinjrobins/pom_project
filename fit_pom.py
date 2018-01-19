@@ -210,7 +210,7 @@ class BayesianScore(pints.ErrorMeasure):
             return float('inf')
         # Take log and add conditional log-likelihood
         log_like = self._log_likelihood(x)
-        return -np.log(prior) - self._log_likelihood(x)
+        return - np.log(prior) - self._log_likelihood(x)/self._log_likelihood._size
 
 
 
