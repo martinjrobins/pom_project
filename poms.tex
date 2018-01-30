@@ -687,7 +687,7 @@ data optimization are needed to obtain chemically sensible outcomes.
 \end{figure}
 
 
-\section{Parameter Estimation using Automated Data Optimization Methods}
+\section{Parameter Estimation using Automated Data Optimization Methods}\label{sec:automated}
 
 The set of parameters to be found is given by the vector $\mathbf{p} =
 (E^0_1,E^0_2,E^0_3,E^0_4,E^0_5,E^0_6,k^0_1,k^0_2,k^0_3,k^0_4,k^0_5,k^0_6,\Gamma)$.
@@ -775,16 +775,95 @@ deviation encodes how confident we are in this "best guess". For the remaining
 paramters we use a uniform prior between the lower and upper bounds given in
 Eq.~\ref{eq:bounds}. Since these uniform priors are independent of the parameter vector $\mathbf{p}$ they do not contribute to the minimisation. 
 
-Given the large number of experimental data samples provided ($N = XXX$),
-there is a danger that the log-likelihood function will completly dominate over
-the prior (i.e. the prior will have no effect above numerical noise), therefore
-we also scale the log-likelihood based on $N$. Combinging the prior with the
-scaled log-likelihood gives our proposed function to be minimised
+Given the large number of experimental data samples provided ($N = XXX$), there
+is a danger that the log-likelihood function will dominate over the prior (i.e.
+the prior will have no effect on the performance of the algorithm), therefore we
+also scale the log-likelihood based on $N$. Combinging the prior with the scaled
+log-likelihood gives the proposed objective function to be minimised
 
-\begin{equation}
+\begin{equation}\label{eq:objective}
     \mathcal{F}(\mathbf{p}) =  \frac{\mathcal{L}(\mathbf{p})}{N} + 
     \sum_{i=1}^6 \log \mathcal{P}_i
 \end{equation}
+
+Using CMA-ES to minimise Eq.~\ref{eq:objective} and using
+$(m_1,m_2,m_3,m_4,m_5,m_6) = ()$ and $\sigma_i = (\sigma_0+1)(E_s-E_r)$, where
+$\sigma_0$ is allowed to vary between $0 \le \sigma_0 \le 20$ gives the results
+shown in Figure~\ref{fig:results}. For each value of $\sigma_0$, 20 separate
+runs of the CMA-ES algorithm were done. The mimimum $\mathcal{F}$ scores for
+each were compared, and the number of "good fits" were calculated, where a good
+fit is determined as one whose $\mathcal{F}$ score was within 1\% of the lowest
+$\mathcal{F}$ for those 20 runs. This information, along with the individual
+scores for all the attempts, is displayed in Figure~\ref{fig:quasi_results}. The
+results show that a $\sigma_0 < 0.2$ is required for an 80\% reliability for the
+automated fitting. These results are very promising, since this indicates that
+an initial guess on each $E^0$ value only needs to be accurate within 20\% of
+the potential sweep range for automated fitting to be reliable. An experiance
+voltammetry user can easily read this estimate off a simple current-voltage plot
+of the experimental trace.
+
+\begin{figure}[h]
+\includegraphics[width=\textwidth]{images/quasireversible.pdf}
+    \caption{\it{Results of automated fitting of model to experimental data
+    using quasireversible model. The left vertical axis shows the objective
+    function Eq.~\ref{eq:objective} versus the scaled standard deviation
+    $\sigma_0$ of the normal prior on the reversible potentials (i.e. the range
+    over which the user expects the optimal $E^0_i$ to be found). A higher
+    $\sigma_0$ indicates a wider range, or less confidence in the initial guess.
+    The right vertical axis shows the number of good fits out of 20 attempts,
+    where a good fit is defined as one that results in an minimal $\mathcal{F}$
+    within 1\% of the best of the 20 attempts. The results show that a range
+    smaller than 0.2 times the range of the potential sweep is required for
+    automated fitting with an accuracy greater than 80\%.}}
+    \label{fig:quasi_results}
+\end{figure}
+
+Figure~\ref{fig:quasi_best_result} show a comparison of the best fit with
+$\sigma_0=0.2$, against the experimental data. The first six harmonics are shown
+for comparison, and it can be seen that ... TODO.
+
+\begin{figure}[h]
+\includegraphics[width=\textwidth]{images/quasireversible_best.pdf}
+    \caption{\it{Comparison of simulated and experimental results for the
+    automated fitting algorithm presented in Section~\ref{sec:sec:automated}.
+    The first to sixth harmonic FTAC voltammograms obtained for first three
+    reductions process of \ce{[PMo12O40]3-} adsorbed on a GC in contact with
+    1.0 M \ce{H2SO4}. AC experimental data obtained with $f = 60$ Hz, $\Delta E
+    = 20$ mV. Simulated data obtained with $R_u = 50 \Omega$, $C_{dl} = 8 \mu
+    F.cm^{-2}$, $T = 298.2$ K, $A = 7.07 \times 10^{-3} cm^2$, and $\Gamma = 53
+    pmole.cm^{-2}$ and other parameters given in tables and text.}}
+    \label{fig:quasi_results}
+\end{figure}
+
+The high reaction rate $k^0$ values found by both the heuristic and automated
+fitting process, indicate that all the reactions are operating close to the
+reversible limit. Therefore it is instructive to consider fitting an easier
+model with each $k^0_i$ parameters set to a constant value of $10^4 s^{-1}$
+(increasing $k^0_i$ above this value does not change the results significantly
+since the simulated model is in the reversible limit). Similar results comparing the number of good fits with varying $\sigma_0$ are shown in Figure~\ref{fig:rev_results}
+
+\begin{figure}[h]
+\includegraphics[width=\textwidth]{images/reversible.pdf}
+    \caption{\it{Results of automated fitting of model to experimental data
+    using the reversible model. The left vertical axis shows the objective
+    function Eq.~\ref{eq:objective} versus the scaled standard deviation
+    $\sigma_0$ of the normal prior on the reversible potentials (i.e. the range
+    over which the user expects the optimal $E^0_i$ to be found). A higher
+    $\sigma_0$ indicates a wider range, or less confidence in the initial guess.
+    The right vertical axis shows the number of good fits out of 20 attempts,
+    where a good fit is defined as one that results in an minimal $\mathcal{F}$
+    within 1\% of the best of the 20 attempts. The results show that a range
+    smaller than 0.2 times the range of the potential sweep is required for
+    automated fitting with an accuracy greater than 80\%.}}
+    \label{fig:quasi_results}
+\end{figure}
+
+
+
+
+
+
+
 
 \section{Conclusions --- still to be written}
 

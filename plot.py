@@ -91,7 +91,7 @@ def plot_harmonic_1_6_full(poms_model, Is, t, output_filename, mod=1):
 
 
 filename = '../POMGCL_6020104_1.0M_SFR_d16.txt'
-plot_sim = False
+plot_sim = True 
 
 dim_params = {
     'reversed': False,
@@ -154,7 +154,7 @@ names = {'reversible':
 
 for reaction_type in ['reversible','quasireversible']:
     pints_model = electrochemistry.PintsModelAdaptor(poms_model,names[reaction_type])
-    dir_names = glob.glob(reaction_type+'_*')
+    dir_names = sorted(glob.glob(reaction_type+'_*'))
     n_samples = len(glob.glob(dir_names[0]+'/params_and_solution*.p'))
     #n_samples = 20
     score = np.zeros(len(dir_names)*n_samples)
@@ -171,16 +171,6 @@ for reaction_type in ['reversible','quasireversible']:
             sample_filename = dir_name+'/params_and_solution%d.p'%(sample+1)
             sample_params,sample_score = pickle.load(open(sample_filename))
             print sample_params
-            if plot_sim:
-                current = pints_model.simulate(sample_params[:-1],times=data.time)
-                f = plt.figure()
-                plt.plot(data.time,current,label='sim')
-                plt.plot(data.time,data.current,label='exp')
-                plt.legend()
-                plt.savefig(dir_name+'/vis%d.pdf'%(sample+1))
-                plt.close(f)
-
-                plot_harmonic_1_6_full(poms_model, [current,data.current], data.time, dir_name+'/visHarmonics%d.pdf'%(sample+1), mod=1)
 
             score[i*n_samples+sample] = sample_score
             min_score = min(min_score,sample_score)
@@ -199,14 +189,30 @@ for reaction_type in ['reversible','quasireversible']:
             sample_params,sample_score = pickle.load(open(sample_filename))
             if (sample_score < 1.01*min_score):
                 num_good_fits[i] = num_good_fits[i] + 1.0
+                
+            if plot_sim:
+                current = pints_model.simulate(sample_params[:-1],times=data.time)
+                f = plt.figure()
+                plt.plot(data.time,current,label='sim')
+                plt.plot(data.time,data.current,label='exp')
+                plt.legend()
+                plt.savefig(dir_name+'/vis%d_%f.pdf'%(sample+1,sample_score))
+                plt.close(f)
+
+                plot_harmonic_1_6_full(poms_model, [current,data.current], data.time, dir_name+'/visHarmonics%d_%f.pdf'%(sample+1,sample_score), mod=1)
+
 
 
 
     fig, ax1 = plt.subplots()
     ax1.plot(stddev,score,'.')
-    ax1.set_ylabel('score')
+    ax1.set_ylabel(r'$\mathcal{F}(\mathbf{p})$')
+    ax1.set_xlabel(r'$\sigma_0$')
     ax2 = ax1.twinx()
-    ax2.plot(stddev_num_good_fits,num_good_fits,'x')
+    stddev_num_good_fits,num_good_fits = [
+        [x for x,_ in sorted(zip(stddev_num_good_fits,num_good_fits))],
+        [x for _,x in sorted(zip(stddev_num_good_fits,num_good_fits))]]
+    ax2.plot(stddev_num_good_fits,num_good_fits,'rx-')
     ax2.set_ylabel('number of good fits', color='r')
     ax2.tick_params('y', colors='r')
     plt.title(reaction_type)
