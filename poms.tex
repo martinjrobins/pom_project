@@ -349,7 +349,7 @@ $R_u C_{dl}$ time constant at potentials where no faradaic current was present.
 
 \section{Results and Discussion}
 
-\subsection{The Model}
+\subsection{The Model}\label{sec:model}
 
 To simulate the total current AC voltammetric data, a mathematical model has to 
 be employed. To mimic the 3 surface confined processes summarized in equations 2 
@@ -467,7 +467,7 @@ $$
 K = \begin{pmatrix}
     - k^1_{red} & k^1_{ox} & 0 & 0 & 0 & 0 \\
       k^1_{red} & -k^2_{red}-k^1_{ox} & k^2_{ox} & 0 & 0 & 0 \\
-      0 & k^2_{red} & -k^3_{red}-k^2_{ox} & k^3_{ox} & 0 & 0 & 0 \\
+      0 & k^2_{red} & -k^3_{red}-k^2_{ox} & k^3_{ox} & 0 & 0 \\
       0 & 0 & k^3_{red} & -k^4_{red}-k^3_{ox} &  k^4_{ox} & 0 \\
       0 & 0 & 0 & k^4_{red} & -k^5_{red}-k^4_{ox} & k^5_{ox} \\
       -k^6_{ox} & -k^6_{ox} & -k^6_{ox} & -k^6_{ox} & k^5_{red} -k^6_{ox}& 
@@ -687,14 +687,114 @@ data optimization are needed to obtain chemically sensible outcomes.
 \end{figure}
 
 
-\section{Parameter Estimation using Automated Data Optimization Methods --still 
-to be written}
+\section{Parameter Estimation using Automated Data Optimization Methods}
+
+The set of parameters to be found is given by the vector $\mathbf{p} =
+(E^0_1,E^0_2,E^0_3,E^0_4,E^0_5,E^0_6,k^0_1,k^0_2,k^0_3,k^0_4,k^0_5,k^0_6,\Gamma)$.
+We also have an experimental current trace given by a vector $\mathbf{I}^{exp}$,
+where each element of the vector $I^{exp}_i$ is the measured current at sample
+time $t_i$. Using the simulated model given in Section \ref{sec:sec:model}, we
+can calculate an equivilent simulated current trace
+$\mathbf{I}^{sim}(\mathbf{p})$, with elements $I^{sim}_i$ calculated at the same
+set of sample times $t_i$. Since the timestep $\delta t$ is unlikely to match
+the experimental sample times, we use linear interpolation to resample the
+simulated current trace to the experimental sample times.
+
+A traditional optimisation function for calculating the optimal parameters given $\mathbf{I}^{exp}$ is the 2-norm distance metric
+
+\begin{equation}
+    \mathcal{F}(\mathbf{p}) = ||\mathbf{I}^{exp}-\mathbf{I}^{sim}(p)|| = \sqrt{\frac{1}{N}\sum_{i=0}^{N} [I^{exp}_i-I^{sim}_i(p)]^2}
+\end{equation}
+
+Minimising this distance will give an optimal set of parameters. We perform the
+minimisation using the genetic algorithm CMA-ES (\TODO cite), using the
+following parameter bounds:
+
+\begin{equation}\label{eq:bounds}
+    \begin{pmatrix}
+        E_{r}+\Delta E \\
+        E_{r}+\Delta E \\
+        E_{r}+\Delta E \\
+        E_{r}+\Delta E \\
+        E_{r}+\Delta E \\
+        E_{r}+\Delta E \\
+        0 \\
+        0 \\
+        0 \\
+        0 \\
+        0 \\
+        0 \\
+        0.1
+    \end{pmatrix}^T
+    \le \mathbf{p} \le
+    \begin{pmatrix}
+        E_{s}-\Delta E \\
+        E_{s}-\Delta E \\
+        E_{s}-\Delta E \\
+        E_{s}-\Delta E \\
+        E_{s}-\Delta E \\
+        E_{s}-\Delta E \\
+        10^4 \\
+        10^4 \\
+        10^4 \\
+        10^4 \\
+        10^4 \\
+        10^4 \\
+        5
+    \end{pmatrix}^T
+\end{equation}
+
+For this problem, some sort of regularisation is neccessary to ensure
+convergence to the optimal parameter set. We find in practice that using the
+standard 2-norm distance metric often results in the algorithm stalling in
+parameter regions where the values of the reversible potential $E^0_i$ for the six
+different reactions have swapped their order. That is, for example, $E^0_1 >
+E^0_3$, even though we know that Process I occurs before Process II. 
+
+We regularise the problem by using a minimisation function inspired by the
+statistical Bayesian framework. Assuming independent Gaussian measurement noise
+at every timestep, we can write down the log-likelihood of $\mathbf{I}^{exp}$
+occuring given a parameter set $\mathbf{p}$ as
+
+\begin{equation}
+    \mathcal{L}(\mathbf{p}) = \sqrt{\frac{1}{2 \sigma^2} \sum_{i=0}^{N} [I^{exp}_i-I^{sim}_i(p)]^2}
+\end{equation}
+
+where $\sigma$ is an unknown measurement noise level that we add to the
+parameter vector $\mathbf{p}$.
+
+We encode our knowlege of the parameters in a Bayesian normal prior for each of
+the $E^0_i$ parameters with a mean $m_i$ and standard deviation $\sigma_i$. 
+
+\begin{equation}
+    \mathcal{P}_i = \frac{1}{\sqrt{2 \pi \sigma_i^2}} e^{-\frac{(p_i-m_i)^2}{2 \sigma_i^2}} \text{      for } i \le 6
+\end{equation}
+
+The mean encodes our "best guess" for the value of $E^0_i$ and the standard
+deviation encodes how confident we are in this "best guess". For the remaining
+paramters we use a uniform prior between the lower and upper bounds given in
+Eq.~\ref{eq:bounds}. Since these uniform priors are independent of the parameter vector $\mathbf{p}$ they do not contribute to the minimisation. 
+
+Given the large number of experimental data samples provided ($N = XXX$),
+there is a danger that the log-likelihood function will completly dominate over
+the prior (i.e. the prior will have no effect above numerical noise), therefore
+we also scale the log-likelihood based on $N$. Combinging the prior with the
+scaled log-likelihood gives our proposed function to be minimised
+
+\begin{equation}
+    \mathcal{F}(\mathbf{p}) =  \frac{\mathcal{L}(\mathbf{p})}{N} + 
+    \sum_{i=1}^6 \log \mathcal{P}_i
+\end{equation}
 
 \section{Conclusions --- still to be written}
 
 \section{Acknowledgements}
 
-K.O. acknowledges the award of Endeavour Research Fellowship for financial support that enabled him to undertake this study at Monash University. The authors also would like to thank Miss Sze-yin Tan for helpful discussions on undertaking simulations using MECSim and the Australian research Council for financial assistance in the form of a Discovery Program grant
+K.O. acknowledges the award of Endeavour Research Fellowship for financial
+support that enabled him to undertake this study at Monash University. The
+authors also would like to thank Miss Sze-yin Tan for helpful discussions on
+undertaking simulations using MECSim and the Australian research Council for
+financial assistance in the form of a Discovery Program grant
 
 
 \bibliography{poms.bib}

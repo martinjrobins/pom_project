@@ -91,7 +91,7 @@ def plot_harmonic_1_6_full(poms_model, Is, t, output_filename, mod=1):
 
 
 filename = '../POMGCL_6020104_1.0M_SFR_d16.txt'
-plot_sim = True
+plot_sim = False
 
 dim_params = {
     'reversed': False,
@@ -156,7 +156,7 @@ for reaction_type in ['reversible','quasireversible']:
     pints_model = electrochemistry.PintsModelAdaptor(poms_model,names[reaction_type])
     dir_names = glob.glob(reaction_type+'_*')
     n_samples = len(glob.glob(dir_names[0]+'/params_and_solution*.p'))
-    #n_samples = 19
+    #n_samples = 20
     score = np.zeros(len(dir_names)*n_samples)
     stddev = np.zeros(len(dir_names)*n_samples)
     num_good_fits = np.zeros(len(dir_names))
