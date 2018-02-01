@@ -105,6 +105,10 @@ if reversible:
                 poms_model.params['Ereverse']+e0_buffer,
                 poms_model.params['Ereverse']+e0_buffer,
                 poms_model.params['Ereverse']+e0_buffer,
+                0.4,
+                0.4,
+                0.0,
+                0.0,
                 0.1,
                 0.005*max_current]
 
@@ -114,6 +118,10 @@ if reversible:
                 poms_model.params['Estart']-e0_buffer,
                 poms_model.params['Estart']-e0_buffer,
                 poms_model.params['Estart']-e0_buffer,
+                0.6,
+                0.6,
+                10*poms_model.params['Ru'],
+                10*poms_model.params['Cdl'],
                 5,
                 0.03*max_current]
 else:
@@ -130,6 +138,10 @@ else:
                 0,
                 0,
                 0,
+                0.4,
+                0.4,
+                0.0,
+                0.0,
                 0.1,
                 0.005*max_current]
 
@@ -145,6 +157,10 @@ else:
                 max_k0,
                 max_k0,
                 max_k0,
+                0.6,
+                0.6,
+                10*poms_model.params['Ru'],
+                10*poms_model.params['Cdl'],
                 5,
                 0.03*max_current]
 
@@ -163,14 +179,14 @@ if diff_i < 1000:
     priors.append(pints.NormalPrior(E2,E2_diff**2))
     priors.append(pints.NormalPrior(E2,E2_diff**2))
     if reversible:
-       priors.append(pints.UniformPrior(lower_bounds[6:8],upper_bounds[6:8]))
+       priors.append(pints.UniformPrior(lower_bounds[6:],upper_bounds[6:]))
     else:
-       priors.append(pints.UniformPrior(lower_bounds[6:14],upper_bounds[6:14]))
+       priors.append(pints.UniformPrior(lower_bounds[6:],upper_bounds[6:]))
 else:
     if reversible:
-       priors.append(pints.UniformPrior(lower_bounds[0:8],upper_bounds[0:8]))
+       priors.append(pints.UniformPrior(lower_bounds[0:],upper_bounds[0:]))
     else:
-       priors.append(pints.UniformPrior(lower_bounds[0:14],upper_bounds[0:14]))
+       priors.append(pints.UniformPrior(lower_bounds[0:],upper_bounds[0:]))
 
 
 # Load a forward model
