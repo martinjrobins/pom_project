@@ -3,7 +3,7 @@
 COUNTER=0
 for reversible in true false
 do
-    for diff_i in `seq 0 20` 1000
+    for diff_i in `seq 0 10` 1000
     do
         for sample_i in `seq 1 20`
         do
