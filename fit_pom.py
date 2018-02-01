@@ -69,6 +69,10 @@ if reversible:
          'E12',
          'E21',
          'E22',
+         'alpha1',
+         'alpha2',
+         'Ru',
+         'Cdl',
          'gamma']
 else:
    names = ['E01',
@@ -83,6 +87,10 @@ else:
          'k12',
          'k21',
          'k22',
+         'alpha1',
+         'alpha2',
+         'Ru',
+         'Cdl',
          'gamma']
 
 

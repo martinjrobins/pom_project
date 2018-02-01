@@ -134,6 +134,10 @@ names = {'reversible':
          'E12',
          'E21',
          'E22',
+         'alpha1',
+         'alpha2',
+         'Ru',
+         'Cdl',
          'gamma'],
          'quasireversible':
         ['E01',
@@ -148,6 +152,10 @@ names = {'reversible':
          'k12',
          'k21',
          'k22',
+         'alpha1',
+         'alpha2',
+         'Ru',
+         'Cdl',
          'gamma']}
 
 
