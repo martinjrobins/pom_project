@@ -91,7 +91,7 @@ def plot_harmonic_1_6_full(poms_model, Is, t, output_filename, mod=1):
 
 
 filename = '../POMGCL_6020104_1.0M_SFR_d16.txt'
-plot_sim = True 
+plot_sim = False
 
 dim_params = {
     'reversed': False,
@@ -154,6 +154,24 @@ names = {'reversible':
 
 for reaction_type in ['reversible','quasireversible']:
     pints_model = electrochemistry.PintsModelAdaptor(poms_model,names[reaction_type])
+
+
+    if reaction_type == 'quasireversible':
+        heuristic_params = [0.368,0.338,0.227,0.227,0.011,-0.016,7300.0,7300.0,10000.0,10000.0,2500.0,2500.0,1.0]
+        heuristic_nondim_params = [poms_model.non_dimensionalise(x,name)  \
+                                    for x,name in zip(heuristic_params,names[reaction_type])]
+        print heuristic_nondim_params
+        current = pints_model.simulate(np.array(heuristic_nondim_params),times=data.time)
+        print np.array(current)
+        f = plt.figure()
+        plt.plot(data.time,current,label='sim')
+        plt.plot(data.time,data.current,label='exp')
+        plt.legend()
+        plt.savefig('heuristic_vis.pdf')
+        plt.close(f)
+        plot_harmonic_1_6_full(poms_model, [current,data.current], data.time, 'heuristic_visHarmonics.pdf', mod=1)
+
+
     dir_names = sorted(glob.glob(reaction_type+'_*'))
     n_samples = len(glob.glob(dir_names[0]+'/params_and_solution*.p'))
     #n_samples = 20
@@ -170,7 +188,14 @@ for reaction_type in ['reversible','quasireversible']:
             print sample
             sample_filename = dir_name+'/params_and_solution%d.p'%(sample+1)
             sample_params,sample_score = pickle.load(open(sample_filename))
-            print sample_params
+            #print 'Non-dimensional params:', sample_params
+
+            print 'Dimensional params:'
+            dim_val_file = open(dir_name+'/dim_params%d.txt'%(sample+1),'w')
+            for val,name in zip(sample_params,names[reaction_type]):
+                print name,'=',poms_model.dimensionalise(val,name),val
+                dim_val_file.write(str(name)+" = "+str(poms_model.dimensionalise(val,name)))
+            dim_val_file.close()
 
             score[i*n_samples+sample] = sample_score
             min_score = min(min_score,sample_score)
