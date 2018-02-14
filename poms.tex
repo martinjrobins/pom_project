@@ -540,7 +540,7 @@ $$
 $$
 
 
-\subsection{Heuristic Method of Parameter Estimation}
+\subsection{Heuristic Method of Parameter Estimation} \label{sec:heuristic}
 
 The heuristic or exclusively experimenter based trial and error method to be 
 tractable requires simplifying the problem and obtaining initial estimates of 
@@ -696,7 +696,12 @@ The set of parameters to be found is given by the vector $\mathbf{p}$
 
 $$
 \mathbf{p} =
-(E^0_1,E^0_2,E^0_3,E^0_4,E^0_5,E^0_6,k^0_1,k^0_2,k^0_3,k^0_4,k^0_5,k^0_6,\Gamma).
+(E^0_1,E^0_2,E^0_3,E^0_4,E^0_5,E^0_6,k^0_1,k^0_2,k^0_3,k^0_4,k^0_5,k^0_6,
+         \alpha_1,
+         \alpha_2,
+         R_u,
+         C_{dl},
+         \Gamma).
 $$
 
 We also have an experimental current trace given by a vector $\mathbf{I}^{exp}$,
@@ -733,6 +738,10 @@ following parameter bounds:
         0 \\
         0 \\
         0 \\
+        0.4 \\
+        0.4 \\
+        0 \\
+        0 \\
         0.1
     \end{pmatrix}^T
     \le \mathbf{p} \le
@@ -749,11 +758,18 @@ following parameter bounds:
         10^4 \\
         10^4 \\
         10^4 \\
+        0.6 \\
+        0.6 \\
+        10 R_u^h \\
+        10 C_{dl}^h\\
         5
-    \end{pmatrix}^T
+    \end{pmatrix}^T,
 \end{equation}
 
-For this problem, some sort of regularisation is neccessary to ensure
+\noindent where $R_u^h$ and $C_{dl}^h$ are the values of $R_u$ and $C_{dl}$ obtained by the 
+heuristic method described in Section \ref{sec:heuristic}.
+
+For this problem, regularisation is neccessary to ensure
 convergence to the optimal parameter set. We find in practice that using the
 standard 2-norm distance metric often results in the algorithm stalling in
 parameter regions where the values of the reversible potential $E^0_i$ for the six
@@ -784,7 +800,7 @@ deviation encodes how confident we are in this "best guess". For the remaining
 paramters we use a uniform prior between the lower and upper bounds given in
 Eq.~\ref{eq:bounds}. Since these uniform priors are independent of the parameter vector $\mathbf{p}$ they do not contribute to the minimisation. 
 
-Given the large number of experimental data samples provided ($N = XXX$), there
+Given the large number of experimental data samples provided ($N = 32728$), there
 is a danger that the log-likelihood function will dominate over the prior (i.e.
 the prior will have no effect on the performance of the algorithm), therefore we
 also scale the log-likelihood based on $N$. Combinging the prior with the scaled
@@ -802,11 +818,13 @@ shown in Figure~\ref{fig:quasi_results}. For each value of $\sigma_0$, 20 separa
 runs of the CMA-ES algorithm were done. The mimimum $\mathcal{F}$ scores for
 each were compared, and the number of "good fits" were calculated, where a good
 fit is determined as one whose $\mathcal{F}$ score was within 1\% of the lowest
-$\mathcal{F}$ for those 20 runs. This information, along with the individual
+$\mathcal{F}$ for those 20 runs. The number of "good fit" was only calculated for 
+values of $\sigma_0$ where at least one fit was determined (visually) to represent 
+a satisfactory fit to the experimental data. This information, along with the individual
 scores for all the attempts, is displayed in Figure~\ref{fig:quasi_results}. The
-results show that a $\sigma_0 < 0.2$ is required for an 80\% reliability for the
+results show that a $\sigma_0 < 0.1$ is required for an 100\% reliability for the
 automated fitting. These results are very promising, since this indicates that
-an initial guess on each $E^0$ value only needs to be accurate within 20\% of
+an initial guess on each $E^0$ value only needs to be accurate within 10\% of
 the potential sweep range for automated fitting to be reliable. An experiance
 voltammetry user can easily read this estimate off a simple current-voltage plot
 of the experimental trace.
@@ -822,30 +840,30 @@ of the experimental trace.
     The right vertical axis shows the number of good fits out of 20 attempts,
     where a good fit is defined as one that results in an minimal $\mathcal{F}$
     within 1\% of the best of the 20 attempts. The results show that a range
-    smaller than 0.2 times the range of the potential sweep is required for
-    automated fitting with an reliability greater than 50\%.}}
+    smaller than 10\% of the potential sweep range is required for
+    automated fitting with an reliability of 100\%.}}
     \label{fig:quasi_results}
 \end{figure}
 
 Figure~\ref{fig:quasi_best_result} show a comparison of the best fit with
-$\sigma_0=0.2$, against the experimental data. The first six harmonics are shown
+$\sigma_0=0.1$, against the experimental data. The first six harmonics are shown
 for comparison, and it can be seen visually that the fit due to the automated
 process is excellent. Hence we have shown that an automated fitting process can
 be reliable, given relativly weak prior information by the user, and result in a
 fit that is equal or superior to the overly laborous, heuristic method.
 
 \begin{figure}[htbp]
-\includegraphics[width=\textwidth]{figs/quasi_visHarmonics2_64_629248.pdf}
+\includegraphics[width=\textwidth]{figs/quasi_visHarmonics1_53_932402.pdf}
     \caption{\it{Comparison of simulated and experimental results for the
     automated fitting algorithm presented in Section~\ref{sec:automated}. The
     first to sixth harmonic FTAC voltammograms obtained for first three
     reductions process of \ce{[PMo12O40]3-} adsorbed on a GC in contact with 1.0
     M \ce{H2SO4}. AC experimental data obtained with $f = 60$ Hz, $\Delta E =
-    20$ mV. Simulated data obtained with $R_u = 50 \Omega$, $C_{dl} = 8 \mu
+    20$ mV. Simulated data obtained with $R_u = 40.3 \Omega$, $C_{dl} = 9.37 \mu
     F.cm^{-2}$, $T = 298.2$ K, $A = 7.07 \times 10^{-3} cm^2$,
-    $(E^0_1,E^0_2,E^0_3,E^0_4,E^0_5,E^0_6) = (0.363, 0.348, 0.215, 0.239, 0.002,
-    -0.018)$ V, $(k^0_1,k^0_2,k^0_3,k^0_4,k^0_5,k^0_6) = (3650, 5069, 6698, 9981,
-    4428, 5766)\text{ s}^{-1}$, and $\Gamma = 30.05\text{ pmole.cm}^{-2}$.}}
+    $(E^0_1,E^0_2,E^0_3,E^0_4,E^0_5,E^0_6) = (0.362, 0.350, 0.215, 0.240, -0.0003,
+    -0.016)$ V, $(k^0_1,k^0_2,k^0_3,k^0_4,k^0_5,k^0_6) = (4950, 4756, 5143, 5280,
+    5029, 5012)\text{ s}^{-1}$, and $\Gamma =28.94\text{ pmole.cm}^{-2}$.}}
     \label{fig:quasi_best_result}
 \end{figure}
 
@@ -859,7 +877,7 @@ the number of good fits with varying $\sigma_0$ are shown in
 Figure~\ref{fig:rev_results}. Here we see that the prior information neccessary
 for the reversible potential parameters is much the same as for the
 quasireversible case, even though we are fitting a far lower number of
-parameters (7 instead of 13). This indicates that it is non-linear response of
+parameters (11 instead of 17). This indicates that it is non-linear response of
 the system in response to changes in $E^0_i$ that causes difficulty in the
 mimimisation process, rather than the high dimensional parameter space.
 
@@ -874,9 +892,9 @@ mimimisation process, rather than the high dimensional parameter space.
     confidence in the initial guess. The right vertical axis shows the number of
     good fits out of 20 attempts, where a good fit is defined as one that
     results in an minimal $\mathcal{F}$ within 1\% of the best of the 20
-    attempts. The results show that a range smaller than 0.2 times the range of
+    attempts. The results show that a range smaller than 0.1 times the range of
     the potential sweep is required for automated fitting with an reliability 
-    greater than 50\%.}}
+    greater than 100\%.}}
     \label{fig:rev_results}
 \end{figure}
 
@@ -886,22 +904,19 @@ indestinguishable from the quasireversible case, indicating that the reactions
 are proceeding close to the reversible limit.
 
 \begin{figure}[htbp]
-\includegraphics[width=\textwidth]{figs/rev_visHarmonics6_17_810104.pdf}
+\includegraphics[width=\textwidth]{figs/rev_visHarmonics1_7_072343.pdf}
     \caption{\it{Comparison of simulated and experimental results for the
     automated fitting algorithm presented in Section~\ref{sec:automated}, and
     for the reversible model (i.e. $k^0_i = 10^{4}\text{ s}^{-1}$). The first to
     sixth harmonic FTAC voltammograms obtained for first three reductions
     process of \ce{[PMo12O40]3-} adsorbed on a GC in contact with 1.0 M
     \ce{H2SO4}. AC experimental data obtained with $f = 60$ Hz, $\Delta E = 20$
-    mV. Simulated data obtained with $R_u = 50 \Omega$, $C_{dl} = 8 \mu
+    mV. Simulated data obtained with $R_u = 54.38 \Omega$, $C_{dl} = 9.6 \mu
     F.cm^{-2}$, $T = 298.2$ K, $A = 7.07 \times 10^{-3} cm^2$, and
-    $(E^0_1,E^0_2,E^0_3,E^0_4,E^0_5,E^0_6) = (0.365, 0.348, 0.215, 0.239, 0.002,
-    -0.019)\text{ V}$, and $\Gamma = 30.01\text{ pmole.cm}^{-2}$.}}
+    $(E^0_1,E^0_2,E^0_3,E^0_4,E^0_5,E^0_6) = (0.362, 0.350, 0.214, 0.240, -0.0003,
+    -0.016)\text{ V}$, and $\Gamma = 28.77\text{ pmole.cm}^{-2}$.}}
     \label{fig:rev_best_result}
 \end{figure}
-
-
-
 
 \section{Conclusions --- still to be written}
 

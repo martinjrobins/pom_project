@@ -222,7 +222,7 @@ for reaction_type in ['reversible','quasireversible']:
             sample_params,sample_score = pickle.load(open(sample_filename))
             if (sample_score < 1.01*min_score):
                 num_good_fits[i] = num_good_fits[i] + 1.0
-                
+
             if plot_sim:
                 current = pints_model.simulate(sample_params[:-1],times=data.time)
                 f = plt.figure()
@@ -236,15 +236,19 @@ for reaction_type in ['reversible','quasireversible']:
 
 
 
-
     fig, ax1 = plt.subplots()
     ax1.plot(stddev,score,'.')
     ax1.set_ylabel(r'$\mathcal{F}(\mathbf{p})$')
     ax1.set_xlabel(r'$\sigma_0$')
     ax2 = ax1.twinx()
-    stddev_num_good_fits,num_good_fits = [
-        [x for x,_ in sorted(zip(stddev_num_good_fits,num_good_fits))],
-        [x for _,x in sorted(zip(stddev_num_good_fits,num_good_fits))]]
+    if reaction_type == 'reversible':
+        stddev_num_good_fits,num_good_fits = [
+            [x for x,_ in sorted(zip(stddev_num_good_fits,num_good_fits)) if x < 0.21],
+            [x for y,x in sorted(zip(stddev_num_good_fits,num_good_fits)) if y < 0.21]]
+    else:
+        stddev_num_good_fits,num_good_fits = [
+            [x for x,_ in sorted(zip(stddev_num_good_fits,num_good_fits)) if x < 0.25],
+            [x for y,x in sorted(zip(stddev_num_good_fits,num_good_fits)) if y < 0.25]]
     ax2.plot(stddev_num_good_fits,num_good_fits,'rx-')
     ax2.set_ylabel('number of good fits', color='r')
     ax2.tick_params('y', colors='r')
