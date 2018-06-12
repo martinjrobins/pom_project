@@ -1,9 +1,11 @@
 #!/bin/bash
 
-python fit_pom.py 0 1 0
-python fit_pom.py 1 2 0
-python fit_pom.py 2 3 0
-python fit_pom.py 3 4 0
+#python fit_pom.py 0 20 0
+#python fit_pom.py 0 20 1
+#python fit_pom.py 0 1 0
+#python fit_pom.py 1 2 0
+#python fit_pom.py 2 3 0
+#python fit_pom.py 3 4 0
 python fit_pom.py 4 5 0
 python fit_pom.py 5 6 0
 python fit_pom.py 6 7 0

@@ -12,20 +12,87 @@ sys.path.insert(0, '../build')
 import pints
 import electrochemistry
 
+dim_params = {
+    'reversed': False,
+    'Estart': 0.6,
+    'Ereverse': -0.1,
+    'omega': 60.05168,
+    'phase': 0,
+    'dE': 20e-3,
+    'v': -0.1043081,
+    't_0': 0.00,
+    'T': 298.2,
+    'a': 0.0707,
+    'c_inf': 0.1*1e-3*1e-3,
+    'Ru': 50.0,
+    'Cdl': 0.000010,
+    'Gamma': 0.7*53.0e-12,
+    'alpha1': 0.5,
+    'alpha2': 0.5,
+    'E01': 0.368,
+    'E02': 0.338,
+    'E11': 0.227,
+    'E12': 0.227,
+    'E21': 0.011,
+    'E22': -0.016,
+    'k01': 1e4,
+    'k02': 1e4,
+    'k11': 1e4,
+    'k12': 1e4,
+    'k21': 1e4,
+    'k22': 1e4
+}
+
+
+def plot_time_full(poms_model, Is, t, output_filename, labels):
+    print 'plot_time_full....', output_filename
+    colors = ['blue', 'red', 'green']
+    f, ax = plt.subplots(1, 1, figsize=(5, 4))
+
+    E_0, T_0, L_0, I_0 = poms_model._calculate_characteristic_values()
+    for n, I in zip(range(len(Is)), Is):
+        ax.plot(np.array(t)*T_0, np.array(I)*I_0*1e6,
+                label=labels[n], c=colors[n], ls='-', alpha=0.5)
+
+    ax.set_ylabel(r'$I \, (\mu A)$')
+    ax.set_xlabel('$t \, (s)$')
+    ax.legend()
+    plt.tight_layout()
+    f.savefig(output_filename+'.pdf')
+    plt.close(f)
+
+
+def plot_time_v_E(poms_model, Is, t, output_filename, labels):
+    print 'plot_time_full....', output_filename
+    colors = ['blue', 'red', 'green']
+    f, ax = plt.subplots(1, 1, figsize=(5, 4))
+
+    E_0, T_0, L_0, I_0 = poms_model._calculate_characteristic_values()
+    for n, I in zip(range(len(Is)), Is):
+        ax.plot(dim_params['Estart'] + dim_params['v']*np.array(t[0:len(t)/2])*T_0, np.array(I[0:len(t)/2])*I_0*1e6,
+                label=labels[n], c=colors[n], ls='-', alpha=0.5)
+
+    ax.set_ylabel(r'$I$ ($\mu$A)')
+    ax.set_xlabel('$E$ (V) vs Ag/AgCl (3M NaCl)')
+    # ax.legend()
+    plt.tight_layout()
+    f.savefig(output_filename+'.pdf')
+    plt.close(f)
+
 
 def plot_harmonic_1_6_full(poms_model, Is, t, output_filename, mod=1):
     print 'plot_harmonic_1_6_full....', output_filename
     colors = ['blue', 'red', 'green']
 
     E_0, T_0, L_0, I_0 = poms_model._calculate_characteristic_values()
-    f, ((ax1, ax2), (ax3, ax4), (ax5, ax6)
-        ) = plt.subplots(3, 2, figsize=(10, 8.4))
-    axs = [ax1, ax2, ax3, ax4, ax5, ax6]
+    f, ((ax1, ax2), (ax3, ax4)
+        ) = plt.subplots(2, 2, figsize=(10.0, 5.6))
+    axs = [ax1, ax2, ax3, ax4]
     dt = t[1]-t[0]
     freqs = np.fft.rfftfreq(len(Is[0]), d=dt)
     omega = poms_model.params['omega']
     signal_f = omega/(2*pi)
-    ia = np.array([1, 2, 3, 4, 5, 6])
+    ia = np.array([1, 2, 3, 4])
     hs = ia*signal_f
     lowcut = hs - signal_f/4
     highcut = hs + signal_f/4
@@ -34,7 +101,7 @@ def plot_harmonic_1_6_full(poms_model, Is, t, output_filename, mod=1):
     for i in range(len(ia)):
         for n, I in zip(range(len(Is)), Is):
             ax = axs[i]
-            #F = fft.rfft(I)*ws[i]
+            # F = fft.rfft(I)*ws[i]
             F = np.fft.fft(I)
             if n == 0:
                 label = 'experiment'
@@ -52,8 +119,8 @@ def plot_harmonic_1_6_full(poms_model, Is, t, output_filename, mod=1):
             neg_index_high = len(F) - band_low
             F_filt = np.zeros(len(F), dtype=complex)
             F_filt[pos_index_low:pos_index_high] = F[pos_index_low:pos_index_high]
-            #F_filt[0:0.5*cfreq+1] = 2*F[pos_index_low+0.5*cfreq:pos_index_high]
-            #F_filt[len(F)-0.5*cfreq+1:] = 2*F[pos_index_low:pos_index_high-0.5*cfreq]
+            # F_filt[0:0.5*cfreq+1] = 2*F[pos_index_low+0.5*cfreq:pos_index_high]
+            # F_filt[len(F)-0.5*cfreq+1:] = 2*F[pos_index_low:pos_index_high-0.5*cfreq]
 
             if cfreq > 0:
                 F = np.concatenate((F_filt[cfreq:], np.zeros(
@@ -61,11 +128,11 @@ def plot_harmonic_1_6_full(poms_model, Is, t, output_filename, mod=1):
             else:
                 F = np.concatenate((F_filt, np.conj(F_filt[-2:0:-1])))
 
-            #wsia[pos_index_low:pos_index_high] = 2.0
-            #wsia[neg_index_low:neg_index_high] = 1.0
-            #wsia[(cfreq-band_high):(cfreq-band_low)] = 1.0
-            #F = F*np.concatenate((ws[i]*2,np.zeros(len(F)-len(ws[i]),dtype=complex)))
-            #F = F*wsia
+            # wsia[pos_index_low:pos_index_high] = 2.0
+            # wsia[neg_index_low:neg_index_high] = 1.0
+            # wsia[(cfreq-band_high):(cfreq-band_low)] = 1.0
+            # F = F*np.concatenate((ws[i]*2,np.zeros(len(F)-len(ws[i]),dtype=complex)))
+            # F = F*wsia
 
             F = np.fft.ifft(F_filt)
             F = 2*np.abs(F)
@@ -98,38 +165,8 @@ def plot_harmonic_1_6_full(poms_model, Is, t, output_filename, mod=1):
 
 
 filename = '../POMGCL_6020104_1.0M_SFR_d16.txt'
-plot_sim = True
+plot_sim = False
 
-dim_params = {
-    'reversed': False,
-    'Estart': 0.6,
-    'Ereverse': -0.1,
-    'omega': 60.05168,
-    'phase': 0,
-    'dE': 20e-3,
-    'v': -0.1043081,
-    't_0': 0.00,
-    'T': 298.2,
-    'a': 0.0707,
-    'c_inf': 0.1*1e-3*1e-3,
-    'Ru': 50.0,
-    'Cdl': 0.000010,
-    'Gamma': 0.7*53.0e-12,
-    'alpha1': 0.5,
-    'alpha2': 0.5,
-    'E01': 0.368,
-    'E02': 0.338,
-    'E11': 0.227,
-    'E12': 0.227,
-    'E21': 0.011,
-    'E22': -0.016,
-    'k01': 1e4,
-    'k02': 1e4,
-    'k11': 1e4,
-    'k12': 1e4,
-    'k21': 1e4,
-    'k22': 1e4
-}
 
 poms_model = electrochemistry.POMModel(dim_params)
 data = electrochemistry.ECTimeData(
@@ -177,22 +214,25 @@ for reaction_type in ['reversible', 'quasireversible']:
         heuristic_nondim_params = [poms_model.non_dimensionalise(x, name)
                                    for x, name in zip(heuristic_params, names[reaction_type])]
         print heuristic_nondim_params
-        current = pints_model.simulate(
-            np.array(heuristic_nondim_params), times=data.time)
-        print np.array(current)
+        heur_current = np.array(pints_model.simulate(
+            np.array(heuristic_nondim_params), times=data.time))
+        print np.array(heur_current)
         f = plt.figure()
-        plt.plot(data.time, current, label='sim')
+        plt.plot(data.time, heur_current, label='sim')
         plt.plot(data.time, data.current, label='exp')
         plt.legend()
         plt.savefig('heuristic_vis.pdf')
         plt.close(f)
         plot_harmonic_1_6_full(poms_model, [
-                               current, data.current], data.time, 'heuristic_visHarmonics.pdf', mod=1)
+                               heur_current, data.current], data.time, 'heuristic_visHarmonics.pdf', mod=1)
+        plot_time_full(poms_model, [
+            heur_current, data.current], data.time, 'heuristic_visTime.pdf', ['heuristic', 'experiment'])
+        plot_time_v_E(poms_model, [data.current], data.time, 'exp_visTimeVE.pdf', ['experiment'])
 
     dir_names = sorted(glob.glob(reaction_type+'_*'))
-    dir_names = [reaction_type+'_2']
+    #dir_names = [reaction_type+'_2']
     n_samples = len(glob.glob(dir_names[0]+'/params_and_solution*.p'))
-    #n_samples = 20
+    # n_samples = 20
     score = np.zeros(len(dir_names)*n_samples)
     stddev = np.zeros(len(dir_names)*n_samples)
     num_good_fits = np.zeros(len(dir_names))
@@ -206,7 +246,7 @@ for reaction_type in ['reversible', 'quasireversible']:
             print sample
             sample_filename = dir_name+'/params_and_solution%d.p' % (sample+1)
             sample_params, sample_score = pickle.load(open(sample_filename))
-            #print 'Non-dimensional params:', sample_params
+            # print 'Non-dimensional params:', sample_params
 
             print 'Dimensional params:'
             dim_val_file = open(dir_name+'/dim_params%d.txt' % (sample+1), 'w')
@@ -247,6 +287,21 @@ for reaction_type in ['reversible', 'quasireversible']:
 
                 plot_harmonic_1_6_full(poms_model, [
                                        current, data.current], data.time, dir_name+'/visHarmonics%d_%f.pdf' % (sample+1, sample_score), mod=1)
+                plot_time_full(poms_model, [
+                    current, data.current], data.time, dir_name+'/visTime%d_%f.pdf' % (sample+1, sample_score), labels=['automated fit', 'experiment'])
+
+                if reaction_type == 'quasireversible':
+                    plot_time_full(poms_model, [
+                        current, heur_current], data.time, dir_name+'/visVersusHeurTime%d_%f.pdf' % (sample+1, sample_score), labels=['automated fit', 'heuristic'])
+
+                if dir_name == 'reversible_2' and sample == 0:
+                    for k in [100, 500, 1000, 5000, 10000]:
+                        k_nondim = poms_model.non_dimensionalise(k, 'k01')
+                        poms_model.set_params_from_vector([k_nondim]*6, ['k01', 'k02', 'k11', 'kl2', 'k21', 'k22'])
+                        current = pints_model.simulate(
+                            sample_params[:-1], times=data.time)
+                        plot_harmonic_1_6_full(poms_model, [
+                            current, data.current], data.time, dir_name+'/visHarmonics_k%f_%d_%f.pdf' % (k, sample+1, sample_score), mod=1)
 
     fig, ax1 = plt.subplots()
     ax1.plot(stddev, score, '.')
@@ -264,7 +319,10 @@ for reaction_type in ['reversible', 'quasireversible']:
                 zip(stddev_num_good_fits, num_good_fits)) if x < 0.25],
             [x for y, x in sorted(zip(stddev_num_good_fits, num_good_fits)) if y < 0.25]]
     ax2.plot(stddev_num_good_fits, num_good_fits, 'rx-')
-    ax2.set_ylabel('number of good fits', color='r')
+    fig.subplots_adjust(right=0.88)
+    #ax2.set_ylabel('number of good fits', color='r', rotation=270, position=(1.9, 0.5))
+    fig.text(0.965, 0.60, 'number of good fits', color='r', rotation=270)
     ax2.tick_params('y', colors='r')
+    # plt.tight_layout()
     plt.title(reaction_type)
     plt.savefig(reaction_type+'.pdf')
